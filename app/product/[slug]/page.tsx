@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
 import { Loading } from "@/components/ui/Loading";
+import { useCart } from "@/lib/context/CartContext";
 import type { ProductWithCategory, ProductVariant } from "@/lib/data/types";
 import { getProductBySlug } from "@/services/products.service";
 import { formatPrice } from "@/lib/utils";
@@ -14,13 +15,18 @@ import Link from "next/link";
 
 function ProductDetailContent() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
+  const { addItem } = useCart();
 
   const [product, setProduct] = useState<ProductWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>("");
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     async function loadProduct() {
@@ -33,6 +39,10 @@ function ProductDetailContent() {
           // Select default variant or first variant
           const defaultVariant = data.variants.find((v) => v.isDefault) || data.variants[0];
           setSelectedVariant(defaultVariant);
+          // Set default color if available
+          if (defaultVariant && defaultVariant.colorOptions.length > 0) {
+            setSelectedColor(defaultVariant.colorOptions[0]);
+          }
         }
       } catch (error) {
         console.error("Error loading product:", error);
@@ -44,6 +54,42 @@ function ProductDetailContent() {
 
     loadProduct();
   }, [slug]);
+
+  // Reset color when variant changes
+  useEffect(() => {
+    if (selectedVariant && selectedVariant.colorOptions.length > 0) {
+      setSelectedColor(selectedVariant.colorOptions[0]);
+    } else {
+      setSelectedColor("");
+    }
+  }, [selectedVariant]);
+
+  function handleAddToCart() {
+    if (!product || !selectedVariant) return;
+
+    setAddingToCart(true);
+
+    const primaryImage = product.images.find((img) => img.isPrimary) || product.images[0];
+
+    addItem({
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      variantId: selectedVariant.id,
+      variantSku: selectedVariant.sku,
+      sizeName: selectedVariant.sizeName,
+      material: selectedVariant.material,
+      selectedColor: selectedColor || "Default",
+      quantity,
+      unitPricePaise: selectedVariant.pricePaise,
+      imageUrl: primaryImage?.url || "/placeholder-product.png",
+    });
+
+    setTimeout(() => {
+      setAddingToCart(false);
+      router.push("/cart");
+    }, 500);
+  }
 
   if (loading) {
     return (
@@ -295,19 +341,78 @@ function ProductDetailContent() {
                   )}
                 </div>
 
-                {/* Add to Cart - Placeholder for M4 */}
+                {/* Color Selection */}
+                {selectedVariant && selectedVariant.colorOptions.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-ink mb-3">
+                      Select Color
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedVariant.colorOptions.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
+                            selectedColor === color
+                              ? "border-lime bg-lime/10 text-ink"
+                              : "border-ink/20 text-ink/70 hover:border-lime/50"
+                          }`}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-ink mb-3">
+                    Quantity
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                      className="w-10 h-10 rounded-lg border-2 border-ink/20 flex items-center justify-center hover:bg-lime/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+
+                    <input
+                      type="number"
+                      min="1"
+                      max="99"
+                      value={quantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        setQuantity(Math.max(1, Math.min(99, val)));
+                      }}
+                      className="w-20 text-center font-medium text-lg border-2 border-ink/20 rounded-lg py-2"
+                    />
+
+                    <button
+                      onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                      disabled={quantity >= 99}
+                      className="w-10 h-10 rounded-lg border-2 border-ink/20 flex items-center justify-center hover:bg-lime/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Add to Cart */}
                 <div className="space-y-3">
                   <Button
                     variant="accent"
                     size="lg"
                     className="w-full rounded-xl"
-                    onClick={() =>
-                      alert(
-                        "Cart functionality will be implemented in Milestone 4: Cart & Checkout. For now, this is a placeholder button."
-                      )
-                    }
+                    onClick={handleAddToCart}
+                    disabled={!selectedVariant || (selectedVariant.colorOptions.length > 0 && !selectedColor) || addingToCart}
                   >
-                    Add to Cart
+                    {addingToCart ? "Adding..." : "Add to Cart"}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"

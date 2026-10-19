@@ -127,34 +127,47 @@ export default async function AccountPage() {
                       Edit Profile
                     </Button>
                   </Link>
+
+                  <Link href="/account/orders">
+                    <Button variant="secondary" className="w-full justify-start">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      View Orders
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* Orders Section (Placeholder for M4) */}
-            <div className="bg-white border-2 border-ink/10 rounded-2xl p-8 text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-16 mx-auto text-ink/20 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
-              <h3 className="font-handwritten text-2xl font-bold text-ink mb-2">
-                Orders Coming Soon
-              </h3>
-              <p className="text-ink/70 mb-6">
-                Order history and tracking will be available in Milestone 4: Cart & Checkout
+            {/* Recent Orders Preview */}
+            <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-ink">Recent Orders</h3>
+                <Link href="/account/orders" className="text-sm text-lime hover:underline">
+                  View All
+                </Link>
+              </div>
+
+              <p className="text-ink/60 text-sm">
+                Your recent orders will appear here. Start shopping to place your first order!
               </p>
-              <Link href="/explore">
-                <Button variant="accent">Browse Products</Button>
+
+              <Link href="/explore" className="mt-4 inline-block">
+                <Button variant="accent" size="md" className="rounded-full">
+                  Browse Products
+                </Button>
               </Link>
             </div>
           </div>

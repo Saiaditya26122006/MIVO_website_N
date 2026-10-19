@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { createClient } from "@/lib/supabase/client";
+import { useCart } from "@/lib/context/CartContext";
 import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
 const navLinks = [
@@ -19,7 +20,7 @@ const navLinks = [
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [cartItemCount] = React.useState(0); // Will be connected to cart context later
+  const { summary } = useCart();
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -93,9 +94,9 @@ export function Navigation() {
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
-              {cartItemCount > 0 && (
+              {summary.itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-lime text-ink text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
+                  {summary.itemCount}
                 </span>
               )}
             </Link>
@@ -196,9 +197,9 @@ export function Navigation() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>Cart</span>
-                  {cartItemCount > 0 && (
+                  {summary.itemCount > 0 && (
                     <span className="bg-lime text-ink text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemCount}
+                      {summary.itemCount}
                     </span>
                   )}
                 </Link>
