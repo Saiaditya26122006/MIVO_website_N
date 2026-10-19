@@ -1,22 +1,29 @@
 /**
- * Products Service
+ * Products Service - Dual Mode (JSON / Supabase)
  *
- * Data access layer for products with search, filter, and sort capabilities.
- * Currently backed by JSON files, designed for easy migration to Supabase.
+ * Automatically selects between JSON and Supabase implementations
+ * based on environment configuration.
  */
 
+import { isSupabaseConfigured } from "@/lib/env";
 import type {
-  Product,
   ProductWithCategory,
   ProductFilters,
   Category,
 } from "@/lib/data/types";
-import productsDataRaw from "@/lib/data/products.json";
-import categoriesDataRaw from "@/lib/data/categories.json";
 
-// Type assertions for JSON imports
-const productsData = productsDataRaw as Product[];
-const categoriesData = categoriesDataRaw as Category[];
+// Import both implementations
+import * as jsonImpl from "./products.service.json";
+import * as supabaseImpl from "./products.service.supabase";
+
+// Determine mode at module load
+const USE_SUPABASE = isSupabaseConfigured();
+
+if (USE_SUPABASE) {
+  console.warn("[Products Service] ✓ Supabase mode enabled");
+} else {
+  console.warn("[Products Service] ℹ Using JSON fallback mode (Supabase not configured)");
+}
 
 /**
  * Get all published products with optional filters
@@ -24,67 +31,22 @@ const categoriesData = categoriesDataRaw as Category[];
 export async function getProducts(
   filters?: ProductFilters
 ): Promise<ProductWithCategory[]> {
-  let results = productsData.filter((p) => p.status === "published");
-
-  // Apply search filter
-  if (filters?.search) {
-    const searchLower = filters.search.toLowerCase();
-    results = results.filter(
-      (p) =>
-        p.name.toLowerCase().includes(searchLower) ||
-        p.shortDescription.toLowerCase().includes(searchLower) ||
-        p.description.toLowerCase().includes(searchLower)
-    );
+  if (USE_SUPABASE) {
+    return supabaseImpl.getProducts(filters);
+  } else {
+    return jsonImpl.getProducts(filters);
   }
-
-  // Apply category filter
-  if (filters?.categoryId) {
-    results = results.filter((p) => p.categoryId === filters.categoryId);
-  }
-
-  // Apply sorting
-  if (filters?.sortBy) {
-    results = [...results].sort((a, b) => {
-      switch (filters.sortBy) {
-        case "name-asc":
-          return a.name.localeCompare(b.name);
-        case "name-desc":
-          return b.name.localeCompare(a.name);
-        case "price-asc": {
-          const priceA = getLowestPrice(a);
-          const priceB = getLowestPrice(b);
-          return priceA - priceB;
-        }
-        case "price-desc": {
-          const priceA = getLowestPrice(a);
-          const priceB = getLowestPrice(b);
-          return priceB - priceA;
-        }
-        default:
-          return 0;
-      }
-    });
-  }
-
-  // Attach category information
-  return results.map((product): ProductWithCategory => ({
-    ...product,
-    category: getCategorySync(product.categoryId),
-  }));
 }
 
 /**
  * Get featured products for homepage
  */
 export async function getFeaturedProducts(): Promise<ProductWithCategory[]> {
-  const featured = productsData.filter(
-    (p) => p.status === "published" && p.featured
-  );
-
-  return featured.map((product): ProductWithCategory => ({
-    ...product,
-    category: getCategorySync(product.categoryId),
-  }));
+  if (USE_SUPABASE) {
+    return supabaseImpl.getFeaturedProducts();
+  } else {
+    return jsonImpl.getFeaturedProducts();
+  }
 }
 
 /**
@@ -93,18 +55,11 @@ export async function getFeaturedProducts(): Promise<ProductWithCategory[]> {
 export async function getProductBySlug(
   slug: string
 ): Promise<ProductWithCategory | null> {
-  const product = productsData.find(
-    (p) => p.slug === slug && p.status === "published"
-  );
-
-  if (!product) return null;
-
-  const result: ProductWithCategory = {
-    ...product,
-    category: getCategorySync(product.categoryId),
-  };
-
-  return result;
+  if (USE_SUPABASE) {
+    return supabaseImpl.getProductBySlug(slug);
+  } else {
+    return jsonImpl.getProductBySlug(slug);
+  }
 }
 
 /**
@@ -113,81 +68,20 @@ export async function getProductBySlug(
 export async function getProductById(
   id: string
 ): Promise<ProductWithCategory | null> {
-  const product = productsData.find(
-    (p) => p.id === id && p.status === "published"
-  );
-
-  if (!product) return null;
-
-  const result: ProductWithCategory = {
-    ...product,
-    category: getCategorySync(product.categoryId),
-  };
-
-  return result;
+  if (USE_SUPABASE) {
+    return supabaseImpl.getProductById(id);
+  } else {
+    return jsonImpl.getProductById(id);
+  }
 }
 
 /**
  * Get all categories
  */
 export async function getCategories(): Promise<Category[]> {
-  return categoriesData;
-}
-
-// Helper functions
-
-function getLowestPrice(product: Product): number {
-  if (product.variants.length === 0) return 0;
-  return Math.min(...product.variants.map((v) => v.pricePaise));
-}
-
-function getCategorySync(categoryId: string): Category {
-  const category = categoriesData.find((c) => c.id === categoryId);
-  if (!category) {
-    // Fallback category if not found
-    return {
-      id: "unknown",
-      name: "Uncategorized",
-      slug: "uncategorized",
-      description: "",
-      imageUrl: "",
-      sortOrder: 999,
-    };
+  if (USE_SUPABASE) {
+    return supabaseImpl.getCategories();
+  } else {
+    return jsonImpl.getCategories();
   }
-  return category;
 }
-
-// ========================================
-// FUTURE SUPABASE MIGRATION
-// ========================================
-// When migrating to Supabase, replace the above with:
-//
-// import { createClient } from "@/lib/supabase/server";
-//
-// export async function getProducts(filters?: ProductFilters): Promise<ProductWithCategory[]> {
-//   const supabase = await createClient();
-//   let query = supabase
-//     .from('products')
-//     .select('*, category:categories(*), images(*), variants(*)')
-//     .eq('status', 'published');
-//
-//   if (filters?.search) {
-//     query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
-//   }
-//
-//   if (filters?.categoryId) {
-//     query = query.eq('category_id', filters.categoryId);
-//   }
-//
-//   if (filters?.sortBy) {
-//     const [field, direction] = filters.sortBy.split('-');
-//     if (field === 'name') {
-//       query = query.order('name', { ascending: direction === 'asc' });
-//     }
-//     // Price sorting would require joining variants table
-//   }
-//
-//   const { data, error } = await query;
-//   if (error) throw error;
-//   return data || [];
-// }

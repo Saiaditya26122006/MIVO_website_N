@@ -119,6 +119,31 @@ CREATE POLICY "Images of published products are viewable"
 -- Admin write access (will be refined in auth milestone)
 -- CREATE POLICY "Admins can manage all products" ...
 
+-- Additional Constraints (M3)
+-- Partial unique index: Ensure at most one primary image per product
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_images_one_primary
+  ON public.product_images(product_id)
+  WHERE is_primary = TRUE;
+
+-- Validate image URLs (basic format check)
+ALTER TABLE public.product_images
+  ADD CONSTRAINT IF NOT EXISTS check_image_url_format
+  CHECK (url ~ '^(https?://|/)');
+
+-- Validate positive dimensions
+ALTER TABLE public.product_variants
+  ADD CONSTRAINT IF NOT EXISTS check_positive_length CHECK (length_mm > 0);
+
+ALTER TABLE public.product_variants
+  ADD CONSTRAINT IF NOT EXISTS check_positive_width CHECK (width_mm > 0);
+
+ALTER TABLE public.product_variants
+  ADD CONSTRAINT IF NOT EXISTS check_positive_height CHECK (height_mm > 0);
+
+-- Validate non-negative prices
+ALTER TABLE public.product_variants
+  ADD CONSTRAINT IF NOT EXISTS check_nonnegative_price CHECK (price_paise >= 0);
+
 -- Validation: Ensure every published product has at least one variant
 -- (Enforced at application level for now, can add CHECK constraint)
 
@@ -128,4 +153,5 @@ BEGIN
   RAISE NOTICE 'Migration 002_catalogue_schema.sql completed successfully';
   RAISE NOTICE 'Tables created: categories, products, product_variants, product_images';
   RAISE NOTICE 'RLS policies applied for public read access';
+  RAISE NOTICE 'Additional constraints added: unique primary images, positive dimensions, non-negative prices';
 END $$;

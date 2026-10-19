@@ -77,10 +77,27 @@ export const serverEnv = {
 } as const;
 
 /**
- * Check if Supabase is configured
+ * Check if Supabase is configured with valid, non-placeholder credentials
  */
 export function isSupabaseConfigured(): boolean {
-  return !!(env.supabase.url && env.supabase.anonKey);
+  const url = env.supabase.url;
+  const key = env.supabase.anonKey;
+
+  // Both must be set AND not placeholder values
+  const hasValidUrl = !!(
+    url &&
+    url !== "your_supabase_project_url" &&
+    url.includes("supabase") &&
+    (url.startsWith("https://") || url.startsWith("http://"))
+  );
+
+  const hasValidKey = !!(
+    key &&
+    key !== "your_supabase_anon_key" &&
+    key.length > 20 // JWT tokens are much longer
+  );
+
+  return hasValidUrl && hasValidKey;
 }
 
 /**

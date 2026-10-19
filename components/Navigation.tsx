@@ -5,6 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
+import { UserMenu } from "@/components/auth/UserMenu";
+import { createClient } from "@/lib/supabase/client";
+import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -17,6 +20,27 @@ const navLinks = [
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [cartItemCount] = React.useState(0); // Will be connected to cart context later
+  const [user, setUser] = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const supabase = createClient();
+
+    // Get initial session
+    supabase.auth.getSession().then((result: { data: { session: Session | null } }) => {
+      setUser(result.data.session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-cream/98 backdrop-blur-sm border-b border-ink/10">
@@ -76,26 +100,30 @@ export function Navigation() {
               )}
             </Link>
 
-            {/* Get a Quote Button */}
-            <Link href="/custom">
-              <Button variant="accent" size="md" className="rounded-full">
-                Get a Quote
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+            {/* User Menu or Auth Buttons */}
+            {!loading && (
+              <>
+                {user ? (
+                  <UserMenu
+                    userEmail={user.email!}
+                    userDisplayName={user.user_metadata?.display_name}
                   />
-                </svg>
-              </Button>
-            </Link>
+                ) : (
+                  <>
+                    <Link href="/auth/login">
+                      <Button variant="secondary" size="md" className="rounded-full">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/auth/register">
+                      <Button variant="accent" size="md" className="rounded-full">
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -175,12 +203,39 @@ export function Navigation() {
                   )}
                 </Link>
 
-                {/* Mobile Get a Quote Button */}
-                <Link href="/custom" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="accent" size="md" className="w-full rounded-full mt-4">
-                    Get a Quote
-                  </Button>
-                </Link>
+                {/* Mobile Auth/Account Links */}
+                {!loading && (
+                  <>
+                    {user ? (
+                      <>
+                        <Link
+                          href="/account"
+                          className="block py-2 text-ink font-medium hover:text-lime transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          My Account
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/auth/login"
+                          className="block py-2 text-ink font-medium hover:text-lime transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Sign In
+                        </Link>
+                        <Link
+                          href="/auth/register"
+                          className="block py-2 text-ink font-medium hover:text-lime transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Sign Up
+                        </Link>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             </motion.div>
           )}
