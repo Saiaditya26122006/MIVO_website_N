@@ -31,6 +31,7 @@ export async function createClient() {
         update: () => Promise.resolve({ data: null, error: null }),
         delete: () => Promise.resolve({ data: null, error: null }),
       }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   }
 
