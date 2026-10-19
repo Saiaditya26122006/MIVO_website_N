@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  // Use a fixed year for prerendering, will be dynamic in client
+  const currentYear = 2026;
 
   return (
     <footer className="bg-ink text-cream">
