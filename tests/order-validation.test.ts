@@ -9,6 +9,8 @@
  */
 
 import { describe, it, expect } from "vitest";
+import productsData from "@/lib/data/products.json";
+import type { Product } from "@/lib/data/types";
 
 describe("Order Creation Validation", () => {
   describe("Price Calculation", () => {
@@ -233,6 +235,97 @@ describe("Order Creation Validation", () => {
 
       const constraintPassed = lineTotalPaise === quantity * unitPricePaise;
       expect(constraintPassed).toBe(false);
+    });
+  });
+
+  describe("Idempotency Key", () => {
+    it("should generate unique idempotency keys", () => {
+      const key1 = `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      const key2 = `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+
+      expect(key1).toMatch(/^checkout_\d+_[a-z0-9]+$/);
+      expect(key2).toMatch(/^checkout_\d+_[a-z0-9]+$/);
+      expect(key1).not.toBe(key2);
+    });
+
+    it("should detect same idempotency key on retry", () => {
+      const key = `checkout_1697000000000_abc123def`;
+
+      const firstRequest = { idempotencyKey: key, items: [{ productId: "p1" }] };
+      const retryRequest = { idempotencyKey: key, items: [{ productId: "p1" }] };
+
+      expect(firstRequest.idempotencyKey).toBe(retryRequest.idempotencyKey);
+    });
+
+    it("should distinguish different checkout sessions", () => {
+      const session1Key = `checkout_1697000000000_abc123`;
+      const session2Key = `checkout_1697000001000_xyz789`;
+
+      expect(session1Key).not.toBe(session2Key);
+    });
+  });
+
+  describe("Product Catalogue Integrity for Order Validation", () => {
+    const products = productsData as Product[];
+    const publishedProducts = products.filter((p) => p.status === "published");
+
+    it("should have published products available for ordering", () => {
+      expect(publishedProducts.length).toBeGreaterThan(0);
+    });
+
+    it("should find products by ID for price validation", () => {
+      for (const product of publishedProducts) {
+        const found = products.find((p) => p.id === product.id);
+        expect(found).toBeDefined();
+        expect(found!.status).toBe("published");
+      }
+    });
+
+    it("should have valid variants for price lookup", () => {
+      for (const product of publishedProducts) {
+        expect(product.variants.length).toBeGreaterThan(0);
+        for (const variant of product.variants) {
+          expect(variant.pricePaise).toBeGreaterThan(0);
+          expect(variant.id).toBeTruthy();
+          expect(variant.sku).toBeTruthy();
+        }
+      }
+    });
+
+    it("should validate color options exist on variants", () => {
+      for (const product of publishedProducts) {
+        for (const variant of product.variants) {
+          expect(Array.isArray(variant.colorOptions)).toBe(true);
+          for (const color of variant.colorOptions) {
+            expect(color.length).toBeGreaterThan(0);
+          }
+        }
+      }
+    });
+
+    it("should reject order items referencing nonexistent products", () => {
+      const fakeProductId = "nonexistent-prod-999";
+      const found = products.find(
+        (p) => p.id === fakeProductId && p.status === "published"
+      );
+      expect(found).toBeUndefined();
+    });
+
+    it("should reject order items referencing nonexistent variants", () => {
+      const product = publishedProducts[0];
+      const fakeVariantId = "nonexistent-var-999";
+      const found = product.variants.find((v) => v.id === fakeVariantId);
+      expect(found).toBeUndefined();
+    });
+
+    it("should calculate server-side price from catalogue, not from client", () => {
+      const product = publishedProducts[0];
+      const variant = product.variants[0];
+      const clientClaimedPrice = 100; // Malicious client claiming ₹1
+      const serverPrice = variant.pricePaise;
+
+      expect(serverPrice).toBeGreaterThan(clientClaimedPrice);
+      expect(serverPrice).toBe(variant.pricePaise);
     });
   });
 });

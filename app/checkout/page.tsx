@@ -23,6 +23,9 @@ export default function CheckoutPage() {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [idempotencyKey] = useState(
+    () => `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+  );
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -169,6 +172,7 @@ export default function CheckoutPage() {
             quantity: item.quantity,
           })),
           contactDetails: formData,
+          idempotencyKey,
         }),
       });
 

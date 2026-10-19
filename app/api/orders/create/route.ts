@@ -6,14 +6,16 @@ import type { CreateOrderRequest, CreateOrderResponse } from "@/lib/data/cart-ty
 /**
  * POST /api/orders/create
  *
- * Server-side order creation with price validation.
- * CRITICAL: Never trust client-provided prices. Always validate against catalogue.
+ * Server-side order creation with:
+ * - Price validation against trusted catalogue (never trust client prices)
+ * - Atomic order + line-item creation via database transaction (RPC)
+ * - Idempotency key to prevent duplicate orders from retries/double-clicks
+ * - Ownership check (order belongs to authenticated user)
  */
 export async function POST(request: NextRequest): Promise<NextResponse<CreateOrderResponse>> {
   try {
     const supabase = await createClient();
 
-    // Check authentication
     const {
       data: { user },
       error: authError,
@@ -26,11 +28,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       );
     }
 
-    // Parse request body
-    const body: CreateOrderRequest = await request.json();
-    const { items, contactDetails } = body;
+    const body: CreateOrderRequest & { idempotencyKey?: string } = await request.json();
+    const { items, contactDetails, idempotencyKey } = body;
 
-    // Validate request structure
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { success: false, error: "Order must contain at least one item" },
@@ -44,27 +44,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
     if (!contactDetails.customerName?.trim()) {
       validationErrors.customerName = "Name is required";
     }
-
     if (!contactDetails.customerEmail?.trim()) {
       validationErrors.customerEmail = "Email is required";
     }
-
     if (!contactDetails.customerPhone?.trim()) {
       validationErrors.customerPhone = "Phone is required";
     }
-
     if (!contactDetails.shippingAddressLine1?.trim()) {
       validationErrors.shippingAddressLine1 = "Address is required";
     }
-
     if (!contactDetails.shippingCity?.trim()) {
       validationErrors.shippingCity = "City is required";
     }
-
     if (!contactDetails.shippingState?.trim()) {
       validationErrors.shippingState = "State is required";
     }
-
     if (!contactDetails.shippingPostalCode?.trim()) {
       validationErrors.shippingPostalCode = "Postal code is required";
     }
@@ -81,7 +75,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
     let subtotalPaise = 0;
 
     for (const item of items) {
-      // Validate item structure
       if (!item.productId || !item.variantId || !item.selectedColor || !item.quantity) {
         return NextResponse.json(
           { success: false, error: "Invalid item structure" },
@@ -96,7 +89,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
-      // Fetch product from trusted source
       const product = await getProductById(item.productId);
 
       if (!product || product.status !== "published") {
@@ -106,7 +98,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
-      // Find variant
       const variant = product.variants.find((v) => v.id === item.variantId);
 
       if (!variant) {
@@ -116,7 +107,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
-      // Validate color option
       if (variant.colorOptions.length > 0 && !variant.colorOptions.includes(item.selectedColor)) {
         return NextResponse.json(
           { success: false, error: `Invalid color option: ${item.selectedColor}` },
@@ -124,117 +114,76 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
-      // Use SERVER-SIDE price from catalogue (never trust client)
       const unitPricePaise = variant.pricePaise;
       const lineTotalPaise = unitPricePaise * item.quantity;
 
       validatedItems.push({
-        productId: product.id,
-        productName: product.name,
-        variantId: variant.id,
-        variantSku: variant.sku,
-        sizeName: variant.sizeName,
+        product_id: product.id,
+        product_name: product.name,
+        variant_id: variant.id,
+        variant_sku: variant.sku,
+        size_name: variant.sizeName,
         material: variant.material,
-        selectedColor: item.selectedColor,
+        selected_color: item.selectedColor,
         quantity: item.quantity,
-        unitPricePaise,
-        lineTotalPaise,
+        unit_price_paise: unitPricePaise,
+        line_total_paise: lineTotalPaise,
       });
 
       subtotalPaise += lineTotalPaise;
     }
 
-    // Calculate shipping (simple flat rate for now)
-    // In M6, this will use admin-configured shipping rates
     const shippingPaise = 10000; // ₹100 flat rate
-
     const totalPaise = subtotalPaise + shippingPaise;
 
-    // Generate order number
-    const { data: orderNumberData, error: orderNumberError } = await supabase.rpc(
-      "generate_order_number"
+    // Generate or use provided idempotency key
+    const effectiveIdempotencyKey =
+      idempotencyKey || `auto_${user.id}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+
+    // Try atomic RPC-based creation first
+    const { data: rpcResult, error: rpcError } = await supabase.rpc(
+      "create_order_atomic",
+      {
+        p_idempotency_key: effectiveIdempotencyKey,
+        p_customer_id: user.id,
+        p_customer_name: contactDetails.customerName,
+        p_customer_email: contactDetails.customerEmail,
+        p_customer_phone: contactDetails.customerPhone,
+        p_shipping_address_line1: contactDetails.shippingAddressLine1,
+        p_shipping_address_line2: contactDetails.shippingAddressLine2 || null,
+        p_shipping_city: contactDetails.shippingCity,
+        p_shipping_state: contactDetails.shippingState,
+        p_shipping_postal_code: contactDetails.shippingPostalCode,
+        p_shipping_country: contactDetails.shippingCountry || "IN",
+        p_subtotal_paise: subtotalPaise,
+        p_shipping_paise: shippingPaise,
+        p_total_paise: totalPaise,
+        p_special_instructions: contactDetails.specialInstructions || null,
+        p_line_items: JSON.stringify(validatedItems),
+      }
     );
 
-    if (orderNumberError) {
-      console.error("[Order Creation] Failed to generate order number:", orderNumberError);
-      return NextResponse.json(
-        { success: false, error: "Failed to generate order number" },
-        { status: 500 }
-      );
+    if (!rpcError && rpcResult) {
+      const result = rpcResult as { order_id: string; order_number?: string; deduplicated: boolean };
+      return NextResponse.json({
+        success: true,
+        orderId: result.order_id,
+        orderNumber: result.order_number,
+      });
     }
 
-    const orderNumber = orderNumberData as string;
-
-    // Create order record
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        order_number: orderNumber,
-        customer_id: user.id,
-        status: "pending_payment",
-        customer_name: contactDetails.customerName,
-        customer_email: contactDetails.customerEmail,
-        customer_phone: contactDetails.customerPhone,
-        shipping_address_line1: contactDetails.shippingAddressLine1,
-        shipping_address_line2: contactDetails.shippingAddressLine2 || null,
-        shipping_city: contactDetails.shippingCity,
-        shipping_state: contactDetails.shippingState,
-        shipping_postal_code: contactDetails.shippingPostalCode,
-        shipping_country: contactDetails.shippingCountry || "IN",
-        subtotal_paise: subtotalPaise,
-        shipping_paise: shippingPaise,
-        total_paise: totalPaise,
-        payment_method: null,
-        payment_id: null,
-        payment_status: "pending",
-        special_instructions: contactDetails.specialInstructions || null,
-      })
-      .select()
-      .single();
-
-    if (orderError || !order) {
-      console.error("[Order Creation] Failed to create order:", orderError);
-      return NextResponse.json(
-        { success: false, error: "Failed to create order" },
-        { status: 500 }
-      );
+    // Fallback: if the RPC doesn't exist yet (function not deployed),
+    // use the sequential insert approach
+    if (rpcError?.code === "42883" || rpcError?.message?.includes("does not exist")) {
+      console.warn("[Order Creation] Atomic RPC not available, falling back to sequential insert");
+      return await createOrderSequential(supabase, user.id, contactDetails, validatedItems, subtotalPaise, shippingPaise, totalPaise);
     }
 
-    // Create line items
-    const lineItemsToInsert = validatedItems.map((item) => ({
-      order_id: order.id,
-      product_id: item.productId,
-      variant_id: item.variantId,
-      product_name: item.productName,
-      variant_sku: item.variantSku,
-      size_name: item.sizeName,
-      material: item.material,
-      selected_color: item.selectedColor,
-      quantity: item.quantity,
-      unit_price_paise: item.unitPricePaise,
-      line_total_paise: item.lineTotalPaise,
-    }));
-
-    const { error: lineItemsError } = await supabase
-      .from("order_line_items")
-      .insert(lineItemsToInsert);
-
-    if (lineItemsError) {
-      console.error("[Order Creation] Failed to create line items:", lineItemsError);
-      // Try to clean up order
-      await supabase.from("orders").delete().eq("id", order.id);
-
-      return NextResponse.json(
-        { success: false, error: "Failed to create order line items" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      orderId: order.id,
-      orderNumber: order.order_number,
-    });
+    console.error("[Order Creation] RPC error:", rpcError);
+    return NextResponse.json(
+      { success: false, error: "Failed to create order" },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("[Order Creation] Unexpected error:", error);
     return NextResponse.json(
@@ -242,4 +191,92 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       { status: 500 }
     );
   }
+}
+
+/**
+ * Fallback sequential order creation when the atomic RPC is not deployed.
+ * Less safe than the RPC (not truly atomic), but preserves functionality
+ * during the migration period.
+ */
+async function createOrderSequential(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  customerId: string,
+  contactDetails: CreateOrderRequest["contactDetails"],
+  validatedItems: Array<Record<string, unknown>>,
+  subtotalPaise: number,
+  shippingPaise: number,
+  totalPaise: number
+): Promise<NextResponse<CreateOrderResponse>> {
+  const { data: orderNumberData, error: orderNumberError } = await supabase.rpc(
+    "generate_order_number"
+  );
+
+  if (orderNumberError) {
+    console.error("[Order Creation] Failed to generate order number:", orderNumberError);
+    return NextResponse.json(
+      { success: false, error: "Failed to generate order number" },
+      { status: 500 }
+    );
+  }
+
+  const orderNumber = orderNumberData as string;
+
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .insert({
+      order_number: orderNumber,
+      customer_id: customerId,
+      status: "pending_payment",
+      customer_name: contactDetails.customerName,
+      customer_email: contactDetails.customerEmail,
+      customer_phone: contactDetails.customerPhone,
+      shipping_address_line1: contactDetails.shippingAddressLine1,
+      shipping_address_line2: contactDetails.shippingAddressLine2 || null,
+      shipping_city: contactDetails.shippingCity,
+      shipping_state: contactDetails.shippingState,
+      shipping_postal_code: contactDetails.shippingPostalCode,
+      shipping_country: contactDetails.shippingCountry || "IN",
+      subtotal_paise: subtotalPaise,
+      shipping_paise: shippingPaise,
+      total_paise: totalPaise,
+      payment_method: null,
+      payment_id: null,
+      payment_status: "pending",
+      special_instructions: contactDetails.specialInstructions || null,
+    })
+    .select()
+    .single();
+
+  if (orderError || !order) {
+    console.error("[Order Creation] Failed to create order:", orderError);
+    return NextResponse.json(
+      { success: false, error: "Failed to create order" },
+      { status: 500 }
+    );
+  }
+
+  const lineItemsToInsert = validatedItems.map((item) => ({
+    order_id: order.id,
+    ...item,
+  }));
+
+  const { error: lineItemsError } = await supabase
+    .from("order_line_items")
+    .insert(lineItemsToInsert);
+
+  if (lineItemsError) {
+    console.error("[Order Creation] Failed to create line items:", lineItemsError);
+    await supabase.from("orders").delete().eq("id", order.id);
+
+    return NextResponse.json(
+      { success: false, error: "Failed to create order line items" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    success: true,
+    orderId: order.id,
+    orderNumber: order.order_number,
+  });
 }
