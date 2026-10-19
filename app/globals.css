@@ -122,7 +122,7 @@ body {
   }
 }
 
-@keyframes scrollDown {
+@keyframes scroll {
   0% {
     transform: translateY(0);
   }
@@ -131,13 +131,8 @@ body {
   }
 }
 
-@keyframes scrollUp {
-  0% {
-    transform: translateY(-50%);
-  }
-  100% {
-    transform: translateY(0);
-  }
+.animate-scroll {
+  animation: scroll linear infinite;
 }
 
 /* Accessibility: Reduced Motion Support */

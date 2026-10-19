@@ -47,7 +47,7 @@ export interface Product {
   categoryId: string;
   images: ProductImage[];
   variants: ProductVariant[];
-  specifications: Record<string, string>;
+  specifications: Record<string, string | undefined>;
   features: string[];
   status: 'draft' | 'published' | 'archived';
   featured: boolean;

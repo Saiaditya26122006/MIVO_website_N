@@ -11,8 +11,12 @@ import type {
   ProductFilters,
   Category,
 } from "@/lib/data/types";
-import productsData from "@/lib/data/products.json";
-import categoriesData from "@/lib/data/categories.json";
+import productsDataRaw from "@/lib/data/products.json";
+import categoriesDataRaw from "@/lib/data/categories.json";
+
+// Type assertions for JSON imports
+const productsData = productsDataRaw as Product[];
+const categoriesData = categoriesDataRaw as Category[];
 
 /**
  * Get all published products with optional filters
@@ -63,7 +67,7 @@ export async function getProducts(
   }
 
   // Attach category information
-  return results.map((product) => ({
+  return results.map((product): ProductWithCategory => ({
     ...product,
     category: getCategorySync(product.categoryId),
   }));
@@ -77,7 +81,7 @@ export async function getFeaturedProducts(): Promise<ProductWithCategory[]> {
     (p) => p.status === "published" && p.featured
   );
 
-  return featured.map((product) => ({
+  return featured.map((product): ProductWithCategory => ({
     ...product,
     category: getCategorySync(product.categoryId),
   }));
@@ -95,10 +99,12 @@ export async function getProductBySlug(
 
   if (!product) return null;
 
-  return {
+  const result: ProductWithCategory = {
     ...product,
     category: getCategorySync(product.categoryId),
   };
+
+  return result;
 }
 
 /**
@@ -113,10 +119,19 @@ export async function getProductById(
 
   if (!product) return null;
 
-  return {
+  const result: ProductWithCategory = {
     ...product,
     category: getCategorySync(product.categoryId),
   };
+
+  return result;
+}
+
+/**
+ * Get all categories
+ */
+export async function getCategories(): Promise<Category[]> {
+  return categoriesData;
 }
 
 // Helper functions
