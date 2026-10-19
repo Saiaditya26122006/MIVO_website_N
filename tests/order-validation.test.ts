@@ -74,7 +74,7 @@ describe("Order Creation Validation", () => {
     });
 
     it("should reject non-array items", () => {
-      const items = null;
+      const items = null as unknown;
       const isValid = Array.isArray(items) && items.length > 0;
 
       expect(isValid).toBe(false);
@@ -186,7 +186,7 @@ describe("Order Creation Validation", () => {
     it("should accept any color when no options defined", () => {
       const variant = {
         id: "var1",
-        colorOptions: [],
+        colorOptions: [] as string[],
       };
       const selectedColor = "Any Color";
 
