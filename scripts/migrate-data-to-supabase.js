@@ -149,7 +149,7 @@ async function importProducts() {
 async function importImages() {
   console.log('\n🖼️  Importing product images...');
 
-  let allImages = [];
+  const allImages = [];
 
   for (const product of data.products) {
     if (!product.images || product.images.length === 0) continue;
@@ -191,7 +191,7 @@ async function importImages() {
 async function importVariants() {
   console.log('\n📐 Importing product variants...');
 
-  let allVariants = [];
+  const allVariants = [];
 
   for (const product of data.products) {
     if (!product.variants || product.variants.length === 0) continue;
