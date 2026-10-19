@@ -1,0 +1,433 @@
+[
+  {
+    "id": "prod-001",
+    "slug": "desk-organizer-modular",
+    "name": "Modular Desk Organizer",
+    "shortDescription": "Customizable desk organization system with interlocking modules",
+    "description": "A versatile desk organizer system that adapts to your needs. Features interlocking modules for pens, cables, small tools, and office supplies. Made to order in your choice of durable materials.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [
+      {
+        "id": "img-001-1",
+        "url": "/placeholders/product-desk-organizer-1.svg",
+        "altText": "Modular desk organizer with multiple compartments - DEMO IMAGE",
+        "displayOrder": 1,
+        "isPrimary": true
+      },
+      {
+        "id": "img-001-2",
+        "url": "/placeholders/product-desk-organizer-2.svg",
+        "altText": "Close-up of interlocking mechanism - DEMO IMAGE",
+        "displayOrder": 2,
+        "isPrimary": false
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-001-1",
+        "sku": "DESK-ORG-SM-PLA",
+        "sizeName": "Small",
+        "dimensions": { "lengthMm": 150, "widthMm": 100, "heightMm": 60 },
+        "material": "PLA",
+        "colorOptions": ["Black", "White", "Gray", "Blue"],
+        "pricePaise": 45000,
+        "productionTimeHours": 4,
+        "isDefault": true
+      },
+      {
+        "id": "var-001-2",
+        "sku": "DESK-ORG-MD-PLA",
+        "sizeName": "Medium",
+        "dimensions": { "lengthMm": 200, "widthMm": 150, "heightMm": 80 },
+        "material": "PLA",
+        "colorOptions": ["Black", "White", "Gray", "Blue"],
+        "pricePaise": 75000,
+        "productionTimeHours": 6,
+        "isDefault": false
+      },
+      {
+        "id": "var-001-3",
+        "sku": "DESK-ORG-LG-PETG",
+        "sizeName": "Large",
+        "dimensions": { "lengthMm": 250, "widthMm": 180, "heightMm": 100 },
+        "material": "PETG",
+        "colorOptions": ["Black", "White", "Transparent"],
+        "pricePaise": 125000,
+        "productionTimeHours": 10,
+        "isDefault": false
+      }
+    ],
+    "specifications": {
+      "Material Options": "PLA, PETG",
+      "Layer Height": "0.2mm",
+      "Infill": "20%",
+      "Finish": "Standard",
+      "Assembly": "Snap-fit, no tools required"
+    },
+    "features": [
+      "Modular interlocking design",
+      "Multiple compartment sizes",
+      "Stackable configuration",
+      "Cable management channels",
+      "Anti-slip rubber feet included"
+    ],
+    "status": "published",
+    "featured": true,
+    "madeToOrder": true,
+    "createdAt": "2026-10-01T10:00:00Z"
+  },
+  {
+    "id": "prod-002",
+    "slug": "prototype-enclosure-electronics",
+    "name": "Electronics Prototype Enclosure",
+    "shortDescription": "Precision-designed enclosure for Arduino, Raspberry Pi, and custom PCBs",
+    "description": "Professional-grade prototype enclosure with customizable mounting points and ventilation. Perfect for electronics projects, IoT devices, and product development.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-002",
+    "images": [
+      {
+        "id": "img-002-1",
+        "url": "/placeholders/product-enclosure-1.svg",
+        "altText": "Electronics enclosure with ventilation slots - DEMO IMAGE",
+        "displayOrder": 1,
+        "isPrimary": true
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-002-1",
+        "sku": "ENC-ELEC-SM-ABS",
+        "sizeName": "Small (Arduino Uno)",
+        "dimensions": { "lengthMm": 100, "widthMm": 80, "heightMm": 40 },
+        "material": "ABS",
+        "colorOptions": ["Black", "White"],
+        "pricePaise": 65000,
+        "productionTimeHours": 5,
+        "isDefault": true
+      },
+      {
+        "id": "var-002-2",
+        "sku": "ENC-ELEC-MD-ABS",
+        "sizeName": "Medium (Raspberry Pi)",
+        "dimensions": { "lengthMm": 120, "widthMm": 100, "heightMm": 50 },
+        "material": "ABS",
+        "colorOptions": ["Black", "White"],
+        "pricePaise": 85000,
+        "productionTimeHours": 6,
+        "isDefault": false
+      }
+    ],
+    "specifications": {
+      "Material": "ABS (heat resistant)",
+      "Mounting": "M3 screw holes",
+      "Ventilation": "Integrated air vents",
+      "Finish": "Smooth exterior",
+      "Tolerances": "±0.1mm"
+    },
+    "features": [
+      "Snap-fit lid design",
+      "Pre-drilled mounting holes",
+      "Ventilation slots for cooling",
+      "Cable management ports",
+      "Professional finish"
+    ],
+    "status": "published",
+    "featured": true,
+    "madeToOrder": true,
+    "createdAt": "2026-09-28T14:00:00Z"
+  },
+  {
+    "id": "prod-003",
+    "slug": "phone-stand-adjustable",
+    "name": "Adjustable Phone Stand",
+    "shortDescription": "Ergonomic phone stand with adjustable viewing angles",
+    "description": "Keep your phone at the perfect viewing angle with this adjustable stand. Features anti-slip base and protective contact surfaces. Ideal for desk, kitchen, or bedside.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [
+      {
+        "id": "img-003-1",
+        "url": "/placeholders/product-phone-stand.svg",
+        "altText": "Adjustable phone stand - DEMO IMAGE",
+        "displayOrder": 1,
+        "isPrimary": true
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-003-1",
+        "sku": "PHONE-STD-UNI-PLA",
+        "sizeName": "Universal",
+        "dimensions": { "lengthMm": 80, "widthMm": 70, "heightMm": 100 },
+        "material": "PLA",
+        "colorOptions": ["Black", "White", "Gray", "Red", "Blue"],
+        "pricePaise": 35000,
+        "productionTimeHours": 3,
+        "isDefault": true
+      },
+      {
+        "id": "var-003-2",
+        "sku": "PHONE-STD-UNI-PETG",
+        "sizeName": "Universal",
+        "dimensions": { "lengthMm": 80, "widthMm": 70, "heightMm": 100 },
+        "material": "PETG",
+        "colorOptions": ["Black", "White", "Transparent"],
+        "pricePaise": 45000,
+        "productionTimeHours": 3,
+        "isDefault": false
+      }
+    ],
+    "specifications": {
+      "Compatibility": "Most smartphones 5-7 inches",
+      "Material Options": "PLA, PETG",
+      "Angle Adjustment": "45°, 60°, 75°",
+      "Weight Capacity": "Up to 300g",
+      "Base": "Anti-slip rubber pads"
+    },
+    "features": [
+      "Adjustable viewing angles",
+      "Anti-slip base and contact surfaces",
+      "Cable pass-through for charging",
+      "Compact and portable",
+      "Compatible with cases"
+    ],
+    "status": "published",
+    "featured": true,
+    "madeToOrder": true,
+    "createdAt": "2026-10-05T09:00:00Z"
+  },
+  {
+    "id": "prod-004",
+    "slug": "cable-clip-organizer-set",
+    "name": "Cable Clip Organizer Set",
+    "shortDescription": "Keep cables tidy with adhesive-backed cable clips",
+    "description": "Set of 10 cable clips that stick to any surface. Perfect for managing charging cables, headphones, and desk wires. Strong adhesive backing with clean removal.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [
+      {
+        "id": "img-004-1",
+        "url": "/placeholders/product-cable-clips.svg",
+        "altText": "Cable clip organizer set - DEMO IMAGE",
+        "displayOrder": 1,
+        "isPrimary": true
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-004-1",
+        "sku": "CABLE-CLIP-10-PLA",
+        "sizeName": "Standard Set (10 clips)",
+        "dimensions": { "lengthMm": 25, "widthMm": 15, "heightMm": 8 },
+        "material": "PLA",
+        "colorOptions": ["Black", "White", "Gray"],
+        "pricePaise": 25000,
+        "productionTimeHours": 2,
+        "isDefault": true
+      }
+    ],
+    "specifications": {
+      "Quantity": "10 clips per set",
+      "Cable Diameter": "Up to 6mm",
+      "Adhesive": "3M double-sided tape included",
+      "Material": "PLA",
+      "Finish": "Smooth"
+    },
+    "features": [
+      "Adhesive backing included",
+      "Fits most cable types",
+      "Clean removal without residue",
+      "Compact design",
+      "Available in multiple colors"
+    ],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-10-08T11:00:00Z"
+  },
+  {
+    "id": "prod-005",
+    "slug": "gear-keychain-functional",
+    "name": "Functional Gear Keychain",
+    "shortDescription": "Working gear mechanism keychain with smooth rotation",
+    "description": "A fascinating keychain featuring interlocking gears that actually rotate. Great conversation starter and fidget toy. Durable construction for everyday carry.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-001",
+    "images": [
+      {
+        "id": "img-005-1",
+        "url": "/placeholders/product-gear-keychain.svg",
+        "altText": "Functional gear keychain - DEMO IMAGE",
+        "displayOrder": 1,
+        "isPrimary": true
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-005-1",
+        "sku": "GEAR-KEY-SM-PLA",
+        "sizeName": "Small",
+        "dimensions": { "lengthMm": 40, "widthMm": 40, "heightMm": 8 },
+        "material": "PLA",
+        "colorOptions": ["Black", "Red", "Blue", "Green"],
+        "pricePaise": 20000,
+        "productionTimeHours": 1,
+        "isDefault": true
+      },
+      {
+        "id": "var-005-2",
+        "sku": "GEAR-KEY-MD-PETG",
+        "sizeName": "Medium",
+        "dimensions": { "lengthMm": 60, "widthMm": 60, "heightMm": 10 },
+        "material": "PETG",
+        "colorOptions": ["Black", "Transparent"],
+        "pricePaise": 30000,
+        "productionTimeHours": 2,
+        "isDefault": false
+      }
+    ],
+    "specifications": {
+      "Mechanism": "Interlocking gears",
+      "Ring": "Standard keyring included",
+      "Material Options": "PLA, PETG",
+      "Finish": "Smooth rotation",
+      "Durability": "Everyday carry rated"
+    },
+    "features": [
+      "Working gear mechanism",
+      "Smooth rotation",
+      "Durable construction",
+      "Lightweight",
+      "Multiple color options"
+    ],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-09-25T16:00:00Z"
+  },
+  {
+    "id": "prod-006",
+    "slug": "planter-pot-geometric",
+    "name": "Geometric Planter Pot",
+    "shortDescription": "Modern geometric design planter for succulents and small plants",
+    "description": "Add a modern touch to your space with this geometric planter. Features drainage hole and removable saucer. Perfect for succulents, cacti, and small plants.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [
+      {
+        "id": "img-006-1",
+        "url": "/placeholders/product-planter.svg",
+        "altText": "Geometric planter pot - DEMO IMAGE",
+        "displayOrder": 1,
+        "isPrimary": true
+      }
+    ],
+    "variants": [
+      {
+        "id": "var-006-1",
+        "sku": "PLANT-GEO-SM-PLA",
+        "sizeName": "Small",
+        "dimensions": { "lengthMm": 80, "widthMm": 80, "heightMm": 70 },
+        "material": "PLA",
+        "colorOptions": ["White", "Gray", "Terracotta", "Mint"],
+        "pricePaise": 55000,
+        "productionTimeHours": 4,
+        "isDefault": true
+      },
+      {
+        "id": "var-006-2",
+        "sku": "PLANT-GEO-MD-PLA",
+        "sizeName": "Medium",
+        "dimensions": { "lengthMm": 120, "widthMm": 120, "heightMm": 100 },
+        "material": "PLA",
+        "colorOptions": ["White", "Gray", "Terracotta"],
+        "pricePaise": 85000,
+        "productionTimeHours": 6,
+        "isDefault": false
+      }
+    ],
+    "specifications": {
+      "Drainage": "Bottom drainage hole",
+      "Saucer": "Matching saucer included",
+      "Material": "PLA (not waterproof - use liner)",
+      "Finish": "Matte",
+      "Style": "Modern geometric"
+    },
+    "features": [
+      "Unique geometric design",
+      "Drainage system",
+      "Removable saucer",
+      "Lightweight",
+      "Multiple colors available"
+    ],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-10-10T13:00:00Z"
+  },
+  {
+    "id": "prod-007",
+    "slug": "bookmark-minimal",
+    "name": "Minimal Page Bookmark",
+    "shortDescription": "Elegant bookmark with clip design",
+    "description": "Simple yet elegant bookmark that clips onto pages without damaging them. Perfect for readers and students.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [{"id": "img-007-1", "url": "/placeholders/product-bookmark.svg", "altText": "Minimal bookmark - DEMO IMAGE", "displayOrder": 1, "isPrimary": true}],
+    "variants": [{"id": "var-007-1", "sku": "BOOK-MIN-UNI-PLA", "sizeName": "Universal", "dimensions": {"lengthMm": 150, "widthMm": 25, "heightMm": 2}, "material": "PLA", "colorOptions": ["Black", "White", "Red"], "pricePaise": 15000, "productionTimeHours": 1, "isDefault": true}],
+    "specifications": {"Material": "PLA", "Thickness": "2mm", "Finish": "Smooth"},
+    "features": ["Clip design", "Non-damaging", "Lightweight", "Durable"],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-10-12T10:00:00Z"
+  },
+  {
+    "id": "prod-008",
+    "slug": "tablet-stand-portable",
+    "name": "Portable Tablet Stand",
+    "shortDescription": "Foldable stand for tablets and e-readers",
+    "description": "Compact and portable stand for tablets. Adjustable angle, folds flat for travel.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [{"id": "img-008-1", "url": "/placeholders/product-tablet-stand.svg", "altText": "Portable tablet stand - DEMO IMAGE", "displayOrder": 1, "isPrimary": true}],
+    "variants": [
+      {"id": "var-008-1", "sku": "TAB-STD-UNI-PLA", "sizeName": "Universal", "dimensions": {"lengthMm": 200, "widthMm": 150, "heightMm": 20}, "material": "PLA", "colorOptions": ["Black", "White"], "pricePaise": 65000, "productionTimeHours": 4, "isDefault": true},
+      {"id": "var-008-2", "sku": "TAB-STD-UNI-PETG", "sizeName": "Universal", "dimensions": {"lengthMm": 200, "widthMm": 150, "heightMm": 20}, "material": "PETG", "colorOptions": ["Black"], "pricePaise": 75000, "productionTimeHours": 4, "isDefault": false}
+    ],
+    "specifications": {"Compatibility": "7-12 inch tablets", "Angles": "Multiple positions", "Portability": "Folds flat"},
+    "features": ["Adjustable angles", "Portable design", "Anti-slip pads", "Sturdy construction"],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-10-15T14:00:00Z"
+  },
+  {
+    "id": "prod-009",
+    "slug": "pen-holder-hexagonal",
+    "name": "Hexagonal Pen Holder",
+    "shortDescription": "Geometric pen and pencil holder for desk",
+    "description": "Modern hexagonal design pen holder. Holds multiple pens, pencils, and markers.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-003",
+    "images": [{"id": "img-009-1", "url": "/placeholders/product-pen-holder.svg", "altText": "Hexagonal pen holder - DEMO IMAGE", "displayOrder": 1, "isPrimary": true}],
+    "variants": [
+      {"id": "var-009-1", "sku": "PEN-HEX-SM-PLA", "sizeName": "Small (6 slots)", "dimensions": {"lengthMm": 80, "widthMm": 80, "heightMm": 100}, "material": "PLA", "colorOptions": ["Black", "White", "Gray", "Blue"], "pricePaise": 40000, "productionTimeHours": 3, "isDefault": true},
+      {"id": "var-009-2", "sku": "PEN-HEX-LG-PLA", "sizeName": "Large (12 slots)", "dimensions": {"lengthMm": 120, "widthMm": 120, "heightMm": 120}, "material": "PLA", "colorOptions": ["Black", "White", "Gray"], "pricePaise": 60000, "productionTimeHours": 5, "isDefault": false}
+    ],
+    "specifications": {"Capacity": "6-12 pens", "Base": "Weighted for stability", "Finish": "Smooth"},
+    "features": ["Hexagonal design", "Multiple compartments", "Stable base", "Modern aesthetic"],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-10-16T09:00:00Z"
+  },
+  {
+    "id": "prod-010",
+    "slug": "mechanical-model-educational",
+    "name": "Mechanical Model - Lever System",
+    "shortDescription": "Educational model demonstrating lever principles",
+    "description": "Interactive mechanical model for learning about levers and mechanical advantage. Perfect for students and educators.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "categoryId": "cat-004",
+    "images": [{"id": "img-010-1", "url": "/placeholders/product-mechanical-model.svg", "altText": "Lever system mechanical model - DEMO IMAGE", "displayOrder": 1, "isPrimary": true}],
+    "variants": [{"id": "var-010-1", "sku": "EDU-LEV-UNI-PLA", "sizeName": "Standard", "dimensions": {"lengthMm": 250, "widthMm": 100, "heightMm": 80}, "material": "PLA", "colorOptions": ["Multi-color"], "pricePaise": 95000, "productionTimeHours": 8, "isDefault": true}],
+    "specifications": {"Type": "First, second, third class levers", "Material": "PLA", "Assembly": "Snap-fit"},
+    "features": ["Demonstrates 3 lever types", "Interactive model", "Educational tool", "Durable construction"],
+    "status": "published",
+    "featured": false,
+    "madeToOrder": true,
+    "createdAt": "2026-10-17T11:00:00Z"
+  }
+]
