@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,6 +14,26 @@ interface UserMenuProps {
 export function UserMenu({ userEmail, userDisplayName }: UserMenuProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function checkAdminStatus() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("customer_profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+
+        setIsAdmin(profile?.is_admin === true);
+      }
+    }
+
+    checkAdminStatus();
+  }, []);
 
   async function handleSignOut() {
     setLoading(true);
@@ -106,6 +126,35 @@ export function UserMenu({ userEmail, userDisplayName }: UserMenuProps) {
               <span className="text-ink font-medium">Profile</span>
             </Link>
           </DropdownMenu.Item>
+
+          {isAdmin && (
+            <>
+              <DropdownMenu.Separator className="h-px bg-ink/10 my-2" />
+
+              <DropdownMenu.Item asChild>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-lime/10 transition-colors cursor-pointer outline-none"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-ink/70"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                  <span className="text-ink font-medium">Admin Dashboard</span>
+                </Link>
+              </DropdownMenu.Item>
+            </>
+          )}
 
           <DropdownMenu.Separator className="h-px bg-ink/10 my-2" />
 
