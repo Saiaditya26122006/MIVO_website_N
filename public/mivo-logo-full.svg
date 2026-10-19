@@ -1,0 +1,7 @@
+<svg width="280" height="80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="280" height="80" fill="#F5F3ED"/>
+  <rect x="2" y="2" width="276" height="76" fill="none" stroke="#101010" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="140" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#101010" text-anchor="middle">MIVO</text>
+  <text x="140" y="55" font-family="Arial, sans-serif" font-size="10" fill="#666" text-anchor="middle">PLACEHOLDER LOGO</text>
+  <text x="140" y="68" font-family="Arial, sans-serif" font-size="8" fill="#999" text-anchor="middle">280 × 80px</text>
+</svg>

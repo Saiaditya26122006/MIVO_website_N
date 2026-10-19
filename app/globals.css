@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+/* MIVO Design Tokens */
+:root {
+  /* Primary Colors */
+  --ink-black: #101010;
+  --cream: #F5F3ED;
+
+  /* Accent Colors */
+  --lime: #B7FF2A;
+  --yellow: #FFD400;
+  --orange: #FF6A00;
+
+  /* Semantic Colors */
+  --color-background: #F5F3ED;
+  --color-foreground: #101010;
+  --color-primary: #101010;
+  --color-accent: #B7FF2A;
+
+  /* Spacing */
+  --spacing-section: 8rem;
+  --spacing-section-mobile: 4rem;
+
+  /* Transitions */
+  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@theme inline {
+  /* Colors */
+  --color-ink: #101010;
+  --color-cream: #F5F3ED;
+  --color-lime: #B7FF2A;
+  --color-yellow: #FFD400;
+  --color-orange: #FF6A00;
+
+  --color-background: var(--color-cream);
+  --color-foreground: var(--color-ink);
+  --color-primary: var(--color-ink);
+  --color-accent: var(--color-lime);
+
+  /* Font Families */
+  --font-sans: var(--font-inter);
+  --font-handwritten: var(--font-caveat);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-DEFAULT: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Marker Utilities */
+.marker-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.marker-underline::after {
+  content: '';
+  position: absolute;
+  left: -2%;
+  bottom: -4px;
+  width: 104%;
+  height: 8px;
+  background: var(--lime);
+  opacity: 0.6;
+  transform: rotate(-0.5deg);
+  border-radius: 2px;
+}
+
+.marker-circle {
+  position: relative;
+  display: inline-block;
+}
+
+.marker-circle::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  right: -10%;
+  bottom: -10%;
+  border: 3px solid var(--lime);
+  border-radius: 50%;
+  opacity: 0.5;
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+
+/* Product Mosaic Animations */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scrollDown {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scrollUp {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Accessibility: Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus Styles */
+*:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
