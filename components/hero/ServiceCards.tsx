@@ -21,8 +21,8 @@ const services: Service[] = [
   {
     title: "CAD Design",
     description: "Professional 3D modeling and engineering design services. We transform your ideas into production-ready CAD files.",
-    image: "/images/services/cad-design.webp",
-    altText: "CAD design workspace showing 3D model on laptop with technical drawings",
+    image: "/images/services/cad-design-fusion.png",
+    altText: "Fusion 360 CAD workspace showing pen plotter design with detailed assembly",
     href: "/custom",
   },
   {
