@@ -176,10 +176,9 @@ export default function AdminProductsPage() {
             ) : (
               <div className="space-y-4">
                 {products.map((product) => (
-                  <Link
+                  <div
                     key={product.id}
-                    href={`/admin/products/${product.id}`}
-                    className="block bg-white border-2 border-ink/10 rounded-2xl p-6 hover:border-lime/50 transition-all"
+                    className="bg-white border-2 border-ink/10 rounded-2xl p-6 hover:border-lime/50 transition-all"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -244,11 +243,13 @@ export default function AdminProductsPage() {
                         </div>
                       </div>
 
-                      <div className="text-sm text-ink/60">
-                        Edit →
-                      </div>
+                      <Link href={`/admin/products/${product.id}/edit`}>
+                        <Button variant="secondary" size="sm">
+                          Edit
+                        </Button>
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}

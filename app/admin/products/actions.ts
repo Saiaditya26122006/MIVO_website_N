@@ -54,6 +54,17 @@ export interface DeleteProductResult {
   error?: string;
 }
 
+export interface UploadImageResult {
+  success: boolean;
+  url?: string;
+  error?: string;
+}
+
+export interface DeleteImageResult {
+  success: boolean;
+  error?: string;
+}
+
 /**
  * Create a new product with variants and images
  */
@@ -436,6 +447,92 @@ export async function deleteProduct(productId: string): Promise<DeleteProductRes
     return {
       success: false,
       error: message.includes("Admin") ? "Unauthorized" : "Failed to delete product",
+    };
+  }
+}
+
+/**
+ * Upload a product image to Supabase Storage
+ */
+export async function uploadProductImage(
+  productId: string,
+  file: File
+): Promise<UploadImageResult> {
+  try {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    // Generate unique filename
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+    // Upload to Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(fileName, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("[Admin] Image upload failed:", uploadError);
+      return { success: false, error: `Upload failed: ${uploadError.message}` };
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(fileName);
+
+    return { success: true, url: urlData.publicUrl };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[Admin] Upload image failed:", message);
+    return {
+      success: false,
+      error: message.includes("Admin") ? "Unauthorized" : "Failed to upload image",
+    };
+  }
+}
+
+/**
+ * Delete a product image from Supabase Storage
+ */
+export async function deleteProductImage(
+  imageId: string,
+  imageUrl: string
+): Promise<DeleteImageResult> {
+  try {
+    await requireAdmin();
+
+    const supabase = await createClient();
+
+    // Extract file path from URL
+    const url = new URL(imageUrl);
+    const pathParts = url.pathname.split("/product-images/");
+    const filePath = pathParts[1];
+
+    if (filePath) {
+      // Delete from storage
+      await supabase.storage.from("product-images").remove([filePath]);
+    }
+
+    // Delete from database
+    const { error } = await supabase.from("product_images").delete().eq("id", imageId);
+
+    if (error) {
+      console.error("[Admin] Failed to delete image record:", error);
+      return { success: false, error: `Database error: ${error.message}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[Admin] Delete image failed:", message);
+    return {
+      success: false,
+      error: message.includes("Admin") ? "Unauthorized" : "Failed to delete image",
     };
   }
 }

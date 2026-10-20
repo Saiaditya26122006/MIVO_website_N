@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { createProduct } from "../actions";
+import { createProduct, uploadProductImage } from "../actions";
 import type { ProductFormData, ProductVariantFormData, ProductImageFormData } from "../actions";
 
 interface Category {
@@ -24,6 +24,8 @@ export default function CreateProductPage() {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [tempProductId, setTempProductId] = useState<string | null>(null);
 
   const [product, setProduct] = useState<ProductFormData>({
     name: "",
@@ -132,6 +134,43 @@ export default function CreateProductPage() {
     setVariants(newVariants);
   }
 
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be less than 5MB");
+      return;
+    }
+
+    // For create page, we'll store the file and upload during product creation
+    // Or we can upload to a temp folder
+    // For simplicity, let's just show a preview without actual upload
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const url = e.target?.result as string;
+      setImages([
+        ...images,
+        {
+          url,
+          altText: product.name || "Product image",
+          displayOrder: images.length,
+          isPrimary: images.length === 0,
+        },
+      ]);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleDeleteImage(index: number) {
+    setImages(images.filter((_, i) => i !== index));
+  }
+
   async function handleSubmit() {
     setError(null);
     setSaving(true);
@@ -191,6 +230,41 @@ export default function CreateProductPage() {
             )}
 
             <div className="space-y-8">
+              {/* Images */}
+              <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
+                <h2 className="font-semibold text-xl text-ink mb-4">Product Images (Optional)</h2>
+                <p className="text-sm text-ink/60 mb-4">You can add images after creating the product</p>
+
+                {images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                    {images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image.url}
+                          alt={image.altText}
+                          className="w-full h-40 object-cover rounded-lg border-2 border-ink/10"
+                        />
+                        {image.isPrimary && (
+                          <div className="absolute top-2 left-2 bg-lime text-ink text-xs font-medium px-2 py-1 rounded">
+                            Primary
+                          </div>
+                        )}
+                        <button
+                          onClick={() => handleDeleteImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="border-2 border-dashed border-ink/20 rounded-xl p-6 text-center">
+                  <p className="text-sm text-ink/60">Note: Image upload will be available after product creation</p>
+                </div>
+              </div>
+
               {/* Basic Information */}
               <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
                 <h2 className="font-semibold text-xl text-ink mb-4">Basic Information</h2>
