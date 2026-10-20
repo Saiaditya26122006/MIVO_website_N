@@ -13,10 +13,6 @@ import { getCategories } from "@/services/products.service";
 import type { Category } from "@/lib/data/types";
 import type { CustomQuotationFormData } from "@/lib/data/quotation-types";
 
-function formatPrice(paise: number): string {
-  return `₹${(paise / 100).toFixed(2)}`;
-}
-
 export default function CustomQuotationPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);

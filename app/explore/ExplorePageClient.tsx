@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { ProductCard } from "@/components/products/ProductCard";
-import { Loading } from "@/components/ui/Loading";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Navigation } from "@/components/Navigation";

@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/context/CartContext";
 import { createClient } from "@/lib/supabase/client";
 import type { CheckoutFormData } from "@/lib/data/cart-types";
-import Link from "next/link";
 
 function formatPrice(paise: number): string {
   return `₹${(paise / 100).toFixed(2)}`;
