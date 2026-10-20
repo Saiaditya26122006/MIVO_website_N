@@ -55,7 +55,7 @@ DECLARE
   v_order_number TEXT;
   v_item JSONB;
 BEGIN
-  -- Check idempotency: if this key was already used, return the existing order
+  -- Check idempotency: if this key was already used by this customer, return the existing order
   SELECT order_id INTO v_existing_order_id
   FROM public.idempotency_keys
   WHERE key = p_idempotency_key
@@ -69,6 +69,16 @@ BEGIN
     );
   END IF;
 
+  -- If a key exists for a different customer, reject it
+  IF EXISTS (
+    SELECT 1 FROM public.idempotency_keys
+    WHERE key = p_idempotency_key
+      AND customer_id != p_customer_id
+  ) THEN
+    RAISE EXCEPTION 'Idempotency key belongs to a different customer'
+      USING ERRCODE = 'invalid_authorization_specification';
+  END IF;
+
   -- Claim the idempotency key (will fail on conflict = concurrent request)
   INSERT INTO public.idempotency_keys (key, customer_id)
   VALUES (p_idempotency_key, p_customer_id)
@@ -76,11 +86,10 @@ BEGIN
 
   -- If we didn't insert (another request got there first), check again
   IF NOT FOUND THEN
-    -- Wait briefly then check if the other request completed
-    PERFORM pg_sleep(0.1);
     SELECT order_id INTO v_existing_order_id
     FROM public.idempotency_keys
     WHERE key = p_idempotency_key
+      AND customer_id = p_customer_id
       AND order_id IS NOT NULL;
 
     IF v_existing_order_id IS NOT NULL THEN
@@ -152,14 +161,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Cleanup expired idempotency keys (call periodically or via pg_cron)
+-- Cleanup expired idempotency keys and orphaned keys from failed transactions
 CREATE OR REPLACE FUNCTION public.cleanup_expired_idempotency_keys()
 RETURNS INTEGER AS $$
 DECLARE
   v_count INTEGER;
 BEGIN
   DELETE FROM public.idempotency_keys
-  WHERE expires_at < NOW();
+  WHERE expires_at < NOW()
+     OR (order_id IS NULL AND created_at < NOW() - INTERVAL '5 minutes');
 
   GET DIAGNOSTICS v_count = ROW_COUNT;
   RETURN v_count;

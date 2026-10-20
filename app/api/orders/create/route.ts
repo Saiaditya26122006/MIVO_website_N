@@ -163,27 +163,42 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       }
     );
 
-    if (!rpcError && rpcResult) {
-      const result = rpcResult as { order_id: string; order_number?: string; deduplicated: boolean };
-      return NextResponse.json({
-        success: true,
-        orderId: result.order_id,
-        orderNumber: result.order_number,
-      });
+    if (rpcError) {
+      console.error("[Order Creation] RPC error:", rpcError);
+
+      if (rpcError.code === "42883" || rpcError.message?.includes("does not exist")) {
+        return NextResponse.json(
+          { success: false, error: "Order service unavailable. The create_order_atomic database function is not deployed." },
+          { status: 503 }
+        );
+      }
+
+      if (rpcError.code === "40001" || rpcError.message?.includes("serialization_failure")) {
+        return NextResponse.json(
+          { success: false, error: "Concurrent order submission detected. Please retry." },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json(
+        { success: false, error: "Failed to create order" },
+        { status: 500 }
+      );
     }
 
-    // Fallback: if the RPC doesn't exist yet (function not deployed),
-    // use the sequential insert approach
-    if (rpcError?.code === "42883" || rpcError?.message?.includes("does not exist")) {
-      console.warn("[Order Creation] Atomic RPC not available, falling back to sequential insert");
-      return await createOrderSequential(supabase, user.id, contactDetails, validatedItems, subtotalPaise, shippingPaise, totalPaise);
+    if (!rpcResult) {
+      return NextResponse.json(
+        { success: false, error: "Failed to create order: no result returned" },
+        { status: 500 }
+      );
     }
 
-    console.error("[Order Creation] RPC error:", rpcError);
-    return NextResponse.json(
-      { success: false, error: "Failed to create order" },
-      { status: 500 }
-    );
+    const result = rpcResult as { order_id: string; order_number?: string; deduplicated: boolean };
+    return NextResponse.json({
+      success: true,
+      orderId: result.order_id,
+      orderNumber: result.order_number,
+    });
   } catch (error) {
     console.error("[Order Creation] Unexpected error:", error);
     return NextResponse.json(
@@ -191,92 +206,4 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       { status: 500 }
     );
   }
-}
-
-/**
- * Fallback sequential order creation when the atomic RPC is not deployed.
- * Less safe than the RPC (not truly atomic), but preserves functionality
- * during the migration period.
- */
-async function createOrderSequential(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  customerId: string,
-  contactDetails: CreateOrderRequest["contactDetails"],
-  validatedItems: Array<Record<string, unknown>>,
-  subtotalPaise: number,
-  shippingPaise: number,
-  totalPaise: number
-): Promise<NextResponse<CreateOrderResponse>> {
-  const { data: orderNumberData, error: orderNumberError } = await supabase.rpc(
-    "generate_order_number"
-  );
-
-  if (orderNumberError) {
-    console.error("[Order Creation] Failed to generate order number:", orderNumberError);
-    return NextResponse.json(
-      { success: false, error: "Failed to generate order number" },
-      { status: 500 }
-    );
-  }
-
-  const orderNumber = orderNumberData as string;
-
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      order_number: orderNumber,
-      customer_id: customerId,
-      status: "pending_payment",
-      customer_name: contactDetails.customerName,
-      customer_email: contactDetails.customerEmail,
-      customer_phone: contactDetails.customerPhone,
-      shipping_address_line1: contactDetails.shippingAddressLine1,
-      shipping_address_line2: contactDetails.shippingAddressLine2 || null,
-      shipping_city: contactDetails.shippingCity,
-      shipping_state: contactDetails.shippingState,
-      shipping_postal_code: contactDetails.shippingPostalCode,
-      shipping_country: contactDetails.shippingCountry || "IN",
-      subtotal_paise: subtotalPaise,
-      shipping_paise: shippingPaise,
-      total_paise: totalPaise,
-      payment_method: null,
-      payment_id: null,
-      payment_status: "pending",
-      special_instructions: contactDetails.specialInstructions || null,
-    })
-    .select()
-    .single();
-
-  if (orderError || !order) {
-    console.error("[Order Creation] Failed to create order:", orderError);
-    return NextResponse.json(
-      { success: false, error: "Failed to create order" },
-      { status: 500 }
-    );
-  }
-
-  const lineItemsToInsert = validatedItems.map((item) => ({
-    order_id: order.id,
-    ...item,
-  }));
-
-  const { error: lineItemsError } = await supabase
-    .from("order_line_items")
-    .insert(lineItemsToInsert);
-
-  if (lineItemsError) {
-    console.error("[Order Creation] Failed to create line items:", lineItemsError);
-    await supabase.from("orders").delete().eq("id", order.id);
-
-    return NextResponse.json(
-      { success: false, error: "Failed to create order line items" },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
-    orderId: order.id,
-    orderNumber: order.order_number,
-  });
 }
