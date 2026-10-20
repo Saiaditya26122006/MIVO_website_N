@@ -135,6 +135,70 @@ body {
   animation: scroll linear infinite;
 }
 
+/* ─── Blueprint / How It Works Animations ─── */
+@keyframes bp-draw {
+  0%   { stroke-dashoffset: 1; opacity: 0; }
+  5%   { opacity: 0.45; }
+  60%  { stroke-dashoffset: 0; opacity: 0.45; }
+  85%  { stroke-dashoffset: 0; opacity: 0.45; }
+  100% { stroke-dashoffset: 1; opacity: 0; }
+}
+.bp-path-draw {
+  stroke-dashoffset: 1;
+  animation: bp-draw 18s ease-in-out infinite;
+}
+
+@keyframes bp-flow-move {
+  0%   { stroke-dashoffset: 96; opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.7; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.bp-flow {
+  opacity: 0;
+  animation: bp-flow-move 18s linear infinite;
+}
+
+@keyframes bp-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.bp-float {
+  animation: bp-float 7s ease-in-out infinite;
+}
+
+@keyframes bp-callout-cycle {
+  0%, 6%   { opacity: 0; }
+  10%, 40% { opacity: 1; }
+  46%, 100%{ opacity: 0; }
+}
+.bp-callout {
+  opacity: 0;
+  animation: bp-callout-cycle 20s ease-in-out infinite;
+}
+
+@keyframes bp-scan-pass {
+  0%   { top: 0%; opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { top: 100%; opacity: 0; }
+}
+.bp-scan {
+  animation: bp-scan-pass 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+@keyframes bp-vert-draw {
+  0%   { transform: scaleY(0); opacity: 0; }
+  5%   { opacity: 1; }
+  60%  { transform: scaleY(1); opacity: 1; }
+  85%  { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(0); opacity: 0; }
+}
+.bp-vert-line {
+  animation: bp-vert-draw 18s ease-in-out infinite;
+}
+
 /* Accessibility: Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -148,6 +212,13 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .bp-path-draw,
+  .bp-flow,
+  .bp-float,
+  .bp-scan,
+  .bp-vert-line { animation: none !important; }
+  .bp-callout { opacity: 1 !important; animation: none !important; }
 }
 
 /* Focus Styles */

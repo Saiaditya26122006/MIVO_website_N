@@ -52,14 +52,17 @@ export function ProductMosaic() {
 
   if (columns.length === 0) {
     return (
-      <div className="h-[600px] rounded-3xl bg-ink/5 border-2 border-ink/10 flex items-center justify-center">
+      <div className="h-[600px] flex items-center justify-center">
         <div className="text-ink/40">Loading products...</div>
       </div>
     );
   }
 
   return (
-    <div className="relative h-[600px] overflow-hidden rounded-3xl border-2 border-ink/10 bg-cream/30">
+    <div
+      className="relative h-[600px] overflow-hidden"
+      style={{ maskImage: 'linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)' }}
+    >
       <div className="flex gap-4 h-full">
         {columns.map((column) => (
           <div key={column.id} className="flex-1 relative overflow-hidden">
@@ -118,9 +121,6 @@ export function ProductMosaic() {
         ))}
       </div>
 
-      {/* Gradient overlays for fade effect */}
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-cream/30 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-cream/30 to-transparent pointer-events-none" />
     </div>
   );
 }

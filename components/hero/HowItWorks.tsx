@@ -1,165 +1,265 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 
-interface Step {
-  number: number;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  image?: string;
-  imageAlt?: string;
-}
-
-const steps: Step[] = [
+const stages = [
   {
-    number: 1,
+    number: "01",
     title: "Share Your Idea",
-    description: "Tell us what you need. Upload sketches, CAD files, or just describe your vision. We'll work with you to understand the requirements.",
+    description:
+      "Upload sketches, CAD files, or just describe your vision — we take it from there.",
     image: "/images/hero/idea-sketch.webp",
-    imageAlt: "Hand sketching a 3D part design with a lightbulb representing the initial idea",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    ),
+    imageAlt: "Design sketch representing the initial concept stage",
+    label: "INPUT",
+    callout: ".STL · .STEP · .3MF",
   },
   {
-    number: 2,
+    number: "02",
     title: "We Design",
-    description: "Our team creates detailed CAD models based on your specifications. You'll receive previews and can request revisions until it's perfect.",
+    description:
+      "Detailed CAD modelling, iteration, and preview until it’s exactly right.",
     image: "/images/services/cad-design.webp",
-    imageAlt: "CAD design workspace with 3D model on laptop and technical drawings",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-      </svg>
-    ),
+    imageAlt: "CAD workspace showing 3D model development",
+    label: "DESIGN",
+    callout: "PARAMETRIC · OPTIMISED",
   },
   {
-    number: 3,
+    number: "03",
     title: "We Print",
-    description: "Using high-quality materials and precision 3D printing technology, we bring your design to life. Production typically takes 24-48 hours.",
+    description:
+      "Precision FDM printing with your chosen material. Typically 24–48 hrs.",
     image: "/images/hero/bambu-printing-gear.png",
-    imageAlt: "Bambu Lab A1 3D printer producing a green gear part",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-    ),
+    imageAlt: "Bambu Lab 3D printer producing a precision gear part",
+    label: "PRINT",
+    callout: "PLA · PETG · ABS",
   },
   {
-    number: 4,
+    number: "04",
     title: "You Get It",
-    description: "Your finished part is carefully packaged and shipped to your doorstep. We provide tracking and quality guarantees on every order.",
+    description:
+      "Quality-checked, carefully packaged, and delivered to your door.",
     image: "/images/services/custom-parts.webp",
-    imageAlt: "Finished 3D printed custom parts including gears, brackets, and enclosures",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>
-    ),
+    imageAlt: "Finished 3D printed custom parts ready for delivery",
+    label: "DELIVER",
+    callout: "QC VERIFIED · TRACKED",
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-};
+const PROCESS_PATH =
+  "M 110 42 C 200 42, 290 58, 370 58 S 560 42, 630 42 S 800 58, 890 58";
 
-const itemVariants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.6 },
-  },
-};
+function Crosshair() {
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none text-ink"
+      viewBox="0 0 100 100"
+      aria-hidden="true"
+    >
+      <line x1="0" y1="50" x2="16" y2="50" stroke="currentColor" strokeWidth="0.4" opacity="0.3" />
+      <line x1="84" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.4" opacity="0.3" />
+      <line x1="50" y1="0" x2="50" y2="16" stroke="currentColor" strokeWidth="0.4" opacity="0.3" />
+      <line x1="50" y1="84" x2="50" y2="100" stroke="currentColor" strokeWidth="0.4" opacity="0.3" />
+      <circle cx="50" cy="50" r="2" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.2" />
+    </svg>
+  );
+}
+
+function RegMark({ className }: { className?: string }) {
+  return (
+    <svg className={`w-5 h-5 text-ink/12 ${className ?? ""}`} viewBox="0 0 20 20" aria-hidden="true">
+      <line x1="10" y1="0" x2="10" y2="20" stroke="currentColor" strokeWidth="0.5" />
+      <line x1="0" y1="10" x2="20" y2="10" stroke="currentColor" strokeWidth="0.5" />
+      <circle cx="10" cy="10" r="5" fill="none" stroke="currentColor" strokeWidth="0.5" />
+    </svg>
+  );
+}
 
 export function HowItWorks() {
   return (
-    <section className="py-24 bg-cream border-t border-ink/10">
+    <section className="py-24 bg-cream relative overflow-hidden">
+      {/* Corner registration marks */}
+      <RegMark className="absolute top-6 left-6 hidden md:block" />
+      <RegMark className="absolute top-6 right-6 hidden md:block" />
+      <RegMark className="absolute bottom-6 left-6 hidden md:block" />
+      <RegMark className="absolute bottom-6 right-6 hidden md:block" />
+
       <div className="max-w-7xl mx-auto px-6">
-        {/* Section Header */}
-        <div className="mb-16">
-          <p className="text-sm font-medium text-ink/60 uppercase tracking-wide mb-4">
-            A Simple Process...
+        {/* Section header */}
+        <div className="mb-16 md:mb-20">
+          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-ink/30 mb-3">
+            Process &middot; Rev 2.0
           </p>
-          <h2 className="font-handwritten text-5xl md:text-6xl font-bold text-ink mb-6">
+          <h2 className="font-handwritten text-5xl md:text-6xl font-bold text-ink mb-4">
             How MIVO Works
             <span className="relative inline-block ml-2">
               <span className="relative z-10">?</span>
               <span className="absolute inset-0 bg-yellow opacity-60 -rotate-3 rounded" />
             </span>
           </h2>
-          <div className="inline-block border-2 border-lime rounded-2xl px-6 py-4 bg-white">
-            <p className="text-ink/70 max-w-2xl">
-              From concept to delivery, we handle every step of the process. Our streamlined workflow ensures quality results and fast turnaround times.
-            </p>
-            <div className="flex flex-wrap gap-2 mt-3">
-              <span className="text-xs font-medium text-ink/60 px-3 py-1 bg-lime/10 rounded-full">Fast</span>
-              <span className="text-xs font-medium text-ink/60 px-3 py-1 bg-lime/10 rounded-full">Reliable</span>
-              <span className="text-xs font-medium text-ink/60 px-3 py-1 bg-lime/10 rounded-full">Quality Guaranteed</span>
-            </div>
+          <p className="text-ink/50 text-lg max-w-lg">
+            From concept to delivery &mdash; one streamlined engineering workflow.
+          </p>
+        </div>
+
+        {/* ── Desktop: 4-across with SVG process path ── */}
+        <div className="hidden md:block relative">
+          {/* Connecting process path overlay */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-10"
+            viewBox="0 0 1000 100"
+            preserveAspectRatio="none"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d={PROCESS_PATH}
+              stroke="#101010"
+              strokeWidth="1"
+              strokeDasharray="4 4"
+              opacity="0.08"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              d={PROCESS_PATH}
+              stroke="#B7FF2A"
+              strokeWidth="2"
+              strokeLinecap="round"
+              pathLength="1"
+              strokeDasharray="1"
+              className="bp-path-draw"
+              opacity="0.45"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              d={PROCESS_PATH}
+              stroke="#B7FF2A"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="8 40"
+              className="bp-flow"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+
+          <div className="grid grid-cols-4 gap-x-10 relative">
+            {stages.map((stage, idx) => (
+              <div key={stage.number} className={`relative z-20 ${idx % 2 === 1 ? "pt-16" : ""}`}>
+                {/* Number + label */}
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className="font-mono text-[26px] font-bold text-lime/45 leading-none">
+                    {stage.number}
+                  </span>
+                  <div className="flex-1 h-px bg-ink/6" />
+                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25">
+                    {stage.label}
+                  </span>
+                </div>
+
+                {/* Image with blueprint overlays */}
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bp-float" style={{ animationDelay: `${idx * 1.8}s` }}>
+                  <Image
+                    src={stage.image}
+                    alt={stage.imageAlt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1280px) 24vw, 270px"
+                  />
+                  <Crosshair />
+                  {idx === 2 && (
+                    <div className="absolute left-0 right-0 h-px bg-lime/40 opacity-0 bp-scan pointer-events-none" aria-hidden="true" />
+                  )}
+                  {/* Dimension line */}
+                  <div className="absolute bottom-1.5 left-2 right-2 flex items-center" aria-hidden="true">
+                    <div className="w-px h-1.5 bg-ink/20" />
+                    <div className="flex-1 h-px bg-ink/12" />
+                    <div className="w-px h-1.5 bg-ink/20" />
+                  </div>
+                </div>
+
+                {/* Cycling callout */}
+                <p
+                  className="font-mono text-[10px] tracking-wider text-lime/60 mb-2 h-4 bp-callout"
+                  style={{ animationDelay: `${idx * 5}s` }}
+                  aria-hidden="true"
+                >
+                  {stage.callout}
+                </p>
+
+                {/* Title + description */}
+                <h3 className="font-handwritten text-[22px] font-bold text-ink mb-1">
+                  {stage.title}
+                </h3>
+                <p className="text-sm text-ink/50 leading-relaxed">
+                  {stage.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Steps Grid with Zigzag Layout */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          {steps.map((step, idx) => (
-            <motion.div
-              key={step.number}
-              variants={itemVariants}
-              className={`relative ${
-                idx === 1 ? "md:mt-24" : idx === 3 ? "md:mt-12" : ""
-              }`}
-            >
-              <div className="bg-white border-2 border-ink/10 rounded-3xl p-8 hover:border-lime transition-colors group">
-                {/* Number Badge */}
-                <div className="absolute -top-8 left-8 w-16 h-16 bg-lime rounded-full border-4 border-white flex items-center justify-center shadow-lg">
-                  <span className="text-2xl font-bold text-ink">{step.number}</span>
+        {/* ── Mobile: vertical timeline ── */}
+        <div className="md:hidden relative">
+          {/* Vertical connecting line */}
+          <div className="absolute left-[26px] top-2 bottom-2 w-px overflow-hidden" aria-hidden="true">
+            <div className="h-full bg-ink/8" />
+            <div
+              className="absolute top-0 left-0 w-full h-full bp-vert-line origin-top"
+              style={{
+                background:
+                  "repeating-linear-gradient(to bottom, rgba(183,255,42,0.35) 0px, rgba(183,255,42,0.35) 5px, transparent 5px, transparent 10px)",
+              }}
+            />
+          </div>
+
+          <div className="space-y-12">
+            {stages.map((stage, idx) => (
+              <div key={stage.number} className="relative pl-16">
+                {/* Timeline node */}
+                <div className="absolute left-0 top-0 w-[54px] h-[54px] rounded-full bg-cream border border-ink/8 flex items-center justify-center z-10">
+                  <span className="font-mono text-sm font-bold text-lime/65">
+                    {stage.number}
+                  </span>
                 </div>
 
-                {/* Image / Icon Container */}
-                <div className="mb-6 mt-8 relative h-48 bg-cream/50 rounded-2xl border-2 border-ink/10 overflow-hidden">
-                  {step.image ? (
-                    <Image
-                      src={step.image}
-                      alt={step.imageAlt || step.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-ink/70 group-hover:text-lime transition-colors">
-                      {step.icon}
-                    </div>
+                {/* Label */}
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25 mb-1.5 block">
+                  {stage.label}
+                </span>
+
+                {/* Image */}
+                <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-3 bp-float" style={{ animationDelay: `${idx * 1.8}s` }}>
+                  <Image
+                    src={stage.image}
+                    alt={stage.imageAlt}
+                    fill
+                    className="object-cover"
+                    sizes="80vw"
+                  />
+                  <Crosshair />
+                  {idx === 2 && (
+                    <div className="absolute left-0 right-0 h-px bg-lime/40 opacity-0 bp-scan pointer-events-none" aria-hidden="true" />
                   )}
                 </div>
 
-                {/* Content */}
-                <h3 className="font-handwritten text-3xl font-bold text-ink mb-3">
-                  {step.title}
+                {/* Callout */}
+                <p
+                  className="font-mono text-[10px] tracking-wider text-lime/50 mb-1.5 bp-callout"
+                  style={{ animationDelay: `${idx * 5}s` }}
+                  aria-hidden="true"
+                >
+                  {stage.callout}
+                </p>
+
+                <h3 className="font-handwritten text-2xl font-bold text-ink mb-1">
+                  {stage.title}
                 </h3>
-                <p className="text-ink/70 leading-relaxed">
-                  {step.description}
+                <p className="text-sm text-ink/50 leading-relaxed">
+                  {stage.description}
                 </p>
               </div>
-            </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
