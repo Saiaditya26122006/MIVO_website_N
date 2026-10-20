@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { updateOrderStatus, type OrderStatus } from "../actions";
 
 interface OrderData {
   id: string;
@@ -116,7 +117,7 @@ export default function AdminOrderDetailPage() {
         .from("orders")
         .select(`
           *,
-          order_items(*)
+          order_line_items(*)
         `)
         .eq("id", orderId)
         .single();
@@ -127,10 +128,10 @@ export default function AdminOrderDetailPage() {
         return;
       }
 
-      const items: OrderItemData[] = ((data.order_items as Record<string, unknown>[]) || []).map((item) => ({
+      const items: OrderItemData[] = ((data.order_line_items as Record<string, unknown>[]) || []).map((item) => ({
         id: item.id as string,
         productName: item.product_name as string,
-        variantName: item.variant_name as string,
+        variantName: `${item.size_name} - ${item.material}`,
         selectedColor: item.selected_color as string | null,
         quantity: item.quantity as number,
         unitPricePaise: item.unit_price_paise as number,
@@ -139,7 +140,7 @@ export default function AdminOrderDetailPage() {
 
       setOrder({
         id: data.id,
-        orderReference: data.order_reference,
+        orderReference: data.order_number,
         status: data.status,
         customerName: data.customer_name,
         customerEmail: data.customer_email,
@@ -163,21 +164,15 @@ export default function AdminOrderDetailPage() {
     loadOrder();
   }, [orderId, router]);
 
-  async function updateOrderStatus(newStatus: string) {
+  async function handleUpdateStatus(newStatus: OrderStatus) {
     if (!order || updating) return;
 
     setUpdating(true);
 
-    const supabase = createClient();
+    const result = await updateOrderStatus(order.id, newStatus);
 
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: newStatus })
-      .eq("id", order.id);
-
-    if (error) {
-      console.error("[Admin Order] Failed to update status:", error);
-      alert("Failed to update order status. Please try again.");
+    if (!result.success) {
+      alert(`Failed to update order status: ${result.error || "Unknown error"}`);
       setUpdating(false);
       return;
     }
@@ -260,7 +255,7 @@ export default function AdminOrderDetailPage() {
                   <Button
                     variant="accent"
                     size="sm"
-                    onClick={() => updateOrderStatus("confirmed")}
+                    onClick={() => handleUpdateStatus("confirmed")}
                     disabled={updating}
                   >
                     Mark as Confirmed
@@ -271,7 +266,7 @@ export default function AdminOrderDetailPage() {
                   <Button
                     variant="accent"
                     size="sm"
-                    onClick={() => updateOrderStatus("processing")}
+                    onClick={() => handleUpdateStatus("processing")}
                     disabled={updating}
                   >
                     Start Processing
@@ -282,7 +277,7 @@ export default function AdminOrderDetailPage() {
                   <Button
                     variant="accent"
                     size="sm"
-                    onClick={() => updateOrderStatus("shipped")}
+                    onClick={() => handleUpdateStatus("shipped")}
                     disabled={updating}
                   >
                     Mark as Shipped
@@ -293,7 +288,7 @@ export default function AdminOrderDetailPage() {
                   <Button
                     variant="accent"
                     size="sm"
-                    onClick={() => updateOrderStatus("delivered")}
+                    onClick={() => handleUpdateStatus("delivered")}
                     disabled={updating}
                   >
                     Mark as Delivered
@@ -304,7 +299,7 @@ export default function AdminOrderDetailPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => updateOrderStatus("cancelled")}
+                    onClick={() => handleUpdateStatus("cancelled")}
                     disabled={updating}
                   >
                     Cancel Order

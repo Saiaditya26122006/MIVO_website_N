@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { updateQuotationStatus, type QuotationStatus } from "../actions";
 
 interface QuotationData {
   id: string;
@@ -146,21 +147,15 @@ export default function AdminQuotationDetailPage() {
     loadQuotation();
   }, [quotationId, router]);
 
-  async function updateQuotationStatus(newStatus: string) {
+  async function handleUpdateStatus(newStatus: QuotationStatus) {
     if (!quotation || updating) return;
 
     setUpdating(true);
 
-    const supabase = createClient();
+    const result = await updateQuotationStatus(quotation.id, newStatus);
 
-    const { error } = await supabase
-      .from("quotation_requests")
-      .update({ status: newStatus })
-      .eq("id", quotation.id);
-
-    if (error) {
-      console.error("[Admin Quotation] Failed to update status:", error);
-      alert("Failed to update quotation status. Please try again.");
+    if (!result.success) {
+      alert(`Failed to update quotation status: ${result.error || "Unknown error"}`);
       setUpdating(false);
       return;
     }
@@ -243,7 +238,7 @@ export default function AdminQuotationDetailPage() {
                   <Button
                     variant="accent"
                     size="sm"
-                    onClick={() => updateQuotationStatus("under_review")}
+                    onClick={() => handleUpdateStatus("under_review")}
                     disabled={updating}
                   >
                     Start Review
@@ -254,7 +249,7 @@ export default function AdminQuotationDetailPage() {
                   <Button
                     variant="accent"
                     size="sm"
-                    onClick={() => updateQuotationStatus("quote_provided")}
+                    onClick={() => handleUpdateStatus("quote_provided")}
                     disabled={updating}
                   >
                     Mark Quote Provided
@@ -266,7 +261,7 @@ export default function AdminQuotationDetailPage() {
                     <Button
                       variant="accent"
                       size="sm"
-                      onClick={() => updateQuotationStatus("quote_accepted")}
+                      onClick={() => handleUpdateStatus("quote_accepted")}
                       disabled={updating}
                     >
                       Mark as Accepted
@@ -274,7 +269,7 @@ export default function AdminQuotationDetailPage() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => updateQuotationStatus("quote_rejected")}
+                      onClick={() => handleUpdateStatus("quote_rejected")}
                       disabled={updating}
                     >
                       Mark as Rejected
@@ -286,7 +281,7 @@ export default function AdminQuotationDetailPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => updateQuotationStatus("cancelled")}
+                    onClick={() => handleUpdateStatus("cancelled")}
                     disabled={updating}
                   >
                     Cancel Request

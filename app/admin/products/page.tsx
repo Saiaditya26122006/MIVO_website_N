@@ -65,7 +65,7 @@ export default function AdminProductsPage() {
           id,
           name,
           description,
-          is_active,
+          status,
           category:categories(name),
           variants:product_variants(price_paise)
         `)
@@ -89,7 +89,7 @@ export default function AdminProductsPage() {
           variantCount: variants.length,
           minPrice: prices.length > 0 ? Math.min(...prices) : 0,
           maxPrice: prices.length > 0 ? Math.max(...prices) : 0,
-          isActive: p.is_active as boolean,
+          isActive: p.status === 'published',
         };
       });
 

@@ -83,6 +83,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect /admin routes - requires authentication
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!session) {
+      const redirectUrl = new URL("/auth/login", request.url);
+      redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   // Redirect authenticated users away from auth pages (except verify-email)
   if (
     request.nextUrl.pathname.startsWith("/auth/") &&

@@ -92,13 +92,13 @@ export default function AdminOrdersPage() {
         .from("orders")
         .select(`
           id,
-          order_reference,
+          order_number,
           status,
           customer_name,
           customer_email,
           total_paise,
           created_at,
-          order_items:order_items(id)
+          order_line_items:order_line_items(id)
         `)
         .order("created_at", { ascending: false });
 
@@ -116,12 +116,12 @@ export default function AdminOrdersPage() {
 
       const ordersList: OrderSummary[] = (data || []).map((o: Record<string, unknown>) => ({
         id: o.id as string,
-        orderReference: o.order_reference as string,
+        orderReference: o.order_number as string,
         status: o.status as string,
         customerName: o.customer_name as string,
         customerEmail: o.customer_email as string,
         totalPaise: o.total_paise as number,
-        itemCount: ((o.order_items as unknown[]) || []).length,
+        itemCount: ((o.order_line_items as unknown[]) || []).length,
         createdAt: o.created_at as string,
       }));
 

@@ -31,17 +31,25 @@ export default async function AdminDashboardPage() {
     redirect("/");
   }
 
-  // Get counts for dashboard
+  // Get counts and metrics for dashboard
   const [
-    { count: productsCount },
-    { count: ordersCount },
-    { count: quotationsCount },
+    { count: totalProducts },
+    { count: publishedProducts },
+    { count: allOrders },
+    { count: pendingOrders },
+    { count: processingOrders },
+    { count: allQuotations },
+    { count: pendingQuotations },
     { count: customersCount },
   ] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("orders").select("*", { count: "exact", head: true }),
+    supabase.from("orders").select("*", { count: "exact", head: true }).in("status", ["pending_payment", "confirmed"]),
+    supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "processing"),
     supabase.from("quotation_requests").select("*", { count: "exact", head: true }),
-    supabase.from("customer_profiles").select("*", { count: "exact", head: true }),
+    supabase.from("quotation_requests").select("*", { count: "exact", head: true }).in("status", ["pending_review", "under_review"]),
+    supabase.from("customer_profiles").select("*", { count: "exact", head: true }).eq("is_admin", false),
   ]);
 
   return (
@@ -82,7 +90,8 @@ export default async function AdminDashboardPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-ink">{productsCount ?? 0}</p>
+                <p className="text-3xl font-bold text-ink">{publishedProducts ?? 0}</p>
+                <p className="text-xs text-ink/50 mt-1">{totalProducts ?? 0} total</p>
               </div>
 
               <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
@@ -103,7 +112,8 @@ export default async function AdminDashboardPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-ink">{ordersCount ?? 0}</p>
+                <p className="text-3xl font-bold text-ink">{pendingOrders ?? 0}</p>
+                <p className="text-xs text-ink/50 mt-1">{allOrders ?? 0} total · {processingOrders ?? 0} in production</p>
               </div>
 
               <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
@@ -124,7 +134,8 @@ export default async function AdminDashboardPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-ink">{quotationsCount ?? 0}</p>
+                <p className="text-3xl font-bold text-ink">{pendingQuotations ?? 0}</p>
+                <p className="text-xs text-ink/50 mt-1">{allQuotations ?? 0} total requests</p>
               </div>
 
               <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
@@ -146,6 +157,7 @@ export default async function AdminDashboardPage() {
                   </svg>
                 </div>
                 <p className="text-3xl font-bold text-ink">{customersCount ?? 0}</p>
+                <p className="text-xs text-ink/50 mt-1">registered users</p>
               </div>
             </div>
 
