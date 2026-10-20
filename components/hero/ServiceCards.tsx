@@ -35,8 +35,8 @@ const services: Service[] = [
   {
     title: "Custom Parts",
     description: "One-off custom parts made to your exact specifications. From replacement parts to unique designs, we make it happen.",
-    image: "/images/services/custom-parts.webp",
-    altText: "Custom 3D printed parts including gears, brackets, and enclosures",
+    image: "/images/services/custom-parts-real.webp",
+    altText: "Collection of real 3D printed custom parts including gears, brackets, lattice structures, and mechanical components",
     href: "/custom",
     featured: true,
   },
