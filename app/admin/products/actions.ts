@@ -456,21 +456,39 @@ export async function deleteProduct(productId: string): Promise<DeleteProductRes
  */
 export async function uploadProductImage(
   productId: string,
-  file: File
+  formData: FormData
 ): Promise<UploadImageResult> {
   try {
     await requireAdmin();
 
     const supabase = await createClient();
 
+    const file = formData.get("file") as File;
+    if (!file) {
+      return { success: false, error: "No file provided" };
+    }
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      return { success: false, error: "File must be an image" };
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      return { success: false, error: "Image must be less than 5MB" };
+    }
+
     // Generate unique filename
     const fileExt = file.name.split(".").pop();
     const fileName = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
+    // Convert file to buffer for server-side upload
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
     // Upload to Supabase Storage
     const { data, error: uploadError } = await supabase.storage
       .from("product-images")
-      .upload(fileName, file, {
+      .upload(fileName, buffer, {
         contentType: file.type,
         upsert: false,
       });

@@ -221,7 +221,11 @@ export default function EditProductPage() {
     setUploadingImage(true);
     setError(null);
 
-    const result = await uploadProductImage(productId, file);
+    // Create FormData to pass file to server action
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const result = await uploadProductImage(productId, formData);
 
     if (!result.success) {
       setError(result.error || "Failed to upload image");
@@ -241,6 +245,9 @@ export default function EditProductPage() {
     ]);
 
     setUploadingImage(false);
+
+    // Reset file input
+    e.target.value = "";
   }
 
   async function handleDeleteImage(index: number) {
