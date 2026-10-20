@@ -59,7 +59,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       selectedColor: selectedColor || "Default",
       quantity,
       unitPricePaise: selectedVariant.pricePaise,
-      imageUrl: primaryImage?.url || "/placeholder-product.png",
+      imageUrl: primaryImage?.url || "",
     });
 
     setTimeout(() => {
@@ -116,14 +116,15 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                       src={primaryImage.url}
                       alt={primaryImage.altText}
                       fill
-                      className="object-contain p-8"
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                       priority
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-ink/20">
+                    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-cream to-lime/10">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-32 w-32"
+                        className="h-24 w-24 text-lime/30"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -132,9 +133,10 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={1.5}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V15m0 0l-2.25-1.313M3 16.5v2.25M21 16.5v2.25M12 3v2.25m6.75 12l2.25-1.313M5.25 17.25l-2.25-1.313"
                         />
                       </svg>
+                      <span className="text-sm font-medium text-ink/30 mt-3">Photo coming soon</span>
                     </div>
                   )}
 

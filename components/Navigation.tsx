@@ -50,11 +50,11 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Image
-              src="/mivo-logo-full.svg"
+              src="/images/brand/mivo-logo-horizontal.png"
               alt="MIVO - Making Ideas Into Visible Objects"
               width={280}
               height={80}
-              className="h-14 w-auto"
+              className="h-12 w-auto"
               priority
             />
           </Link>

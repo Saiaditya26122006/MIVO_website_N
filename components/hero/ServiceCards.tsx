@@ -1,9 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface Service {
   title: string;
   description: string;
   image: string;
+  altText: string;
   href: string;
   featured?: boolean;
 }
@@ -12,25 +14,29 @@ const services: Service[] = [
   {
     title: "3D Printing",
     description: "High-precision additive manufacturing with a wide range of materials and finishes. Perfect for prototypes and production parts.",
-    image: "/services/3d-printing.webp",
+    image: "/images/services/3d-printing.webp",
+    altText: "3D printer creating a precision part with green PLA filament",
     href: "/explore?category=functional-parts",
   },
   {
     title: "CAD Design",
     description: "Professional 3D modeling and engineering design services. We transform your ideas into production-ready CAD files.",
-    image: "/services/cad-design.webp",
+    image: "/images/services/cad-design.webp",
+    altText: "CAD design workspace showing 3D model on laptop with technical drawings",
     href: "/custom",
   },
   {
     title: "Prototyping",
     description: "Rapid prototyping services to validate your concepts quickly. Iterate faster and bring products to market with confidence.",
-    image: "/services/prototyping.webp",
+    image: "/images/services/prototyping.webp",
+    altText: "3D printed electronics prototype enclosure with ventilation and mounting points",
     href: "/explore?category=prototypes",
   },
   {
     title: "Custom Parts",
     description: "One-off custom parts made to your exact specifications. From replacement parts to unique designs, we make it happen.",
-    image: "/services/custom-parts.webp",
+    image: "/images/services/custom-parts.webp",
+    altText: "Custom 3D printed parts including gears, brackets, and enclosures",
     href: "/custom",
     featured: true,
   },
@@ -72,22 +78,13 @@ export function ServiceCards() {
             >
               {/* Image Container */}
               <div className="aspect-square bg-cream/50 relative overflow-hidden">
-                <div className="flex items-center justify-center h-full text-ink/20">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-24 w-24"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
+                <Image
+                  src={service.image}
+                  alt={service.altText}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                />
 
                 {service.featured && (
                   <div className="absolute top-3 right-3 bg-lime text-ink text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">

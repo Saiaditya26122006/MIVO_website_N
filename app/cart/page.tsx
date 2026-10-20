@@ -91,13 +91,21 @@ export default function CartPage() {
                       href={`/product/${item.productSlug}`}
                       className="flex-shrink-0"
                     >
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.productName}
-                        width={120}
-                        height={120}
-                        className="rounded-xl object-cover"
-                      />
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.productName}
+                          width={120}
+                          height={120}
+                          className="rounded-xl object-cover"
+                        />
+                      ) : (
+                        <div className="w-[120px] h-[120px] rounded-xl bg-gradient-to-br from-cream to-lime/10 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-lime/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V15m0 0l-2.25-1.313M3 16.5v2.25M21 16.5v2.25M12 3v2.25m6.75 12l2.25-1.313M5.25 17.25l-2.25-1.313" />
+                          </svg>
+                        </div>
+                      )}
                     </Link>
 
                     {/* Product Details */}

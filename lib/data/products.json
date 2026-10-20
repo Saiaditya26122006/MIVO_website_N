@@ -4,22 +4,15 @@
     "slug": "desk-organizer-modular",
     "name": "Modular Desk Organizer",
     "shortDescription": "Customizable desk organization system with interlocking modules",
-    "description": "A versatile desk organizer system that adapts to your needs. Features interlocking modules for pens, cables, small tools, and office supplies. Made to order in your choice of durable materials.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "A versatile desk organizer system that adapts to your needs. Features interlocking modules for pens, cables, small tools, and office supplies. Made to order in your choice of durable materials.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
     "images": [
       {
         "id": "11a3db78-6a71-25af-b0b4-f278e28778d3",
-        "url": "/placeholders/product-desk-organizer-1.svg",
-        "altText": "Modular desk organizer with multiple compartments - DEMO IMAGE",
+        "url": "/images/products/functional-parts.webp",
+        "altText": "3D printed modular parts including precision gear, brackets, and enclosure components",
         "displayOrder": 1,
         "isPrimary": true
-      },
-      {
-        "id": "efcefa15-568b-29bd-92f5-a7321830272e",
-        "url": "/placeholders/product-desk-organizer-2.svg",
-        "altText": "Close-up of interlocking mechanism - DEMO IMAGE",
-        "displayOrder": 2,
-        "isPrimary": false
       }
     ],
     "variants": [
@@ -107,13 +100,13 @@
     "slug": "prototype-enclosure-electronics",
     "name": "Electronics Prototype Enclosure",
     "shortDescription": "Precision-designed enclosure for Arduino, Raspberry Pi, and custom PCBs",
-    "description": "Professional-grade prototype enclosure with customizable mounting points and ventilation. Perfect for electronics projects, IoT devices, and product development.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Professional-grade prototype enclosure with customizable mounting points and ventilation. Perfect for electronics projects, IoT devices, and product development.",
     "categoryId": "022f7e58-ca17-7426-a2bd-7e7d33171f4a",
     "images": [
       {
         "id": "47eaa067-4974-68c1-a5cd-8d2b0797007b",
-        "url": "/placeholders/product-enclosure-1.svg",
-        "altText": "Electronics enclosure with ventilation slots - DEMO IMAGE",
+        "url": "/images/products/electronics-enclosure.webp",
+        "altText": "3D printed electronics prototype enclosure with ventilation slots and mounting points",
         "displayOrder": 1,
         "isPrimary": true
       }
@@ -180,17 +173,9 @@
     "slug": "phone-stand-adjustable",
     "name": "Adjustable Phone Stand",
     "shortDescription": "Ergonomic phone stand with adjustable viewing angles",
-    "description": "Keep your phone at the perfect viewing angle with this adjustable stand. Features anti-slip base and protective contact surfaces. Ideal for desk, kitchen, or bedside.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Keep your phone at the perfect viewing angle with this adjustable stand. Features anti-slip base and protective contact surfaces. Ideal for desk, kitchen, or bedside.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
-    "images": [
-      {
-        "id": "3a0dfd19-66ed-6a7c-a4de-6a6c838b4a70",
-        "url": "/placeholders/product-phone-stand.svg",
-        "altText": "Adjustable phone stand - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "c03ba19e-abd2-2b65-474d-5964fcedb226",
@@ -257,17 +242,9 @@
     "slug": "cable-clip-organizer-set",
     "name": "Cable Clip Organizer Set",
     "shortDescription": "Keep cables tidy with adhesive-backed cable clips",
-    "description": "Set of 10 cable clips that stick to any surface. Perfect for managing charging cables, headphones, and desk wires. Strong adhesive backing with clean removal.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Set of 10 cable clips that stick to any surface. Perfect for managing charging cables, headphones, and desk wires. Strong adhesive backing with clean removal.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
-    "images": [
-      {
-        "id": "c56e722e-135c-c9bf-2ae7-62a345bc4226",
-        "url": "/placeholders/product-cable-clips.svg",
-        "altText": "Cable clip organizer set - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "64983a00-ae35-a35a-4dce-97fd9f6c9d77",
@@ -313,13 +290,13 @@
     "slug": "gear-keychain-functional",
     "name": "Functional Gear Keychain",
     "shortDescription": "Working gear mechanism keychain with smooth rotation",
-    "description": "A fascinating keychain featuring interlocking gears that actually rotate. Great conversation starter and fidget toy. Durable construction for everyday carry.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "A fascinating keychain featuring interlocking gears that actually rotate. Great conversation starter and fidget toy. Durable construction for everyday carry.",
     "categoryId": "ec198ec9-b537-283e-a030-2ef0e066a1f9",
     "images": [
       {
         "id": "80e8c60d-326f-289a-0e28-744b21fff774",
-        "url": "/placeholders/product-gear-keychain.svg",
-        "altText": "Functional gear keychain - DEMO IMAGE",
+        "url": "/images/products/gear-keychain.png",
+        "altText": "Bambu Lab A1 3D printer producing a functional gear in green PLA",
         "displayOrder": 1,
         "isPrimary": true
       }
@@ -388,17 +365,9 @@
     "slug": "planter-pot-geometric",
     "name": "Geometric Planter Pot",
     "shortDescription": "Modern geometric design planter for succulents and small plants",
-    "description": "Add a modern touch to your space with this geometric planter. Features drainage hole and removable saucer. Perfect for succulents, cacti, and small plants.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Add a modern touch to your space with this geometric planter. Features drainage hole and removable saucer. Perfect for succulents, cacti, and small plants.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
-    "images": [
-      {
-        "id": "baf40495-d99b-b2a0-e741-f0fb3a341650",
-        "url": "/placeholders/product-planter.svg",
-        "altText": "Geometric planter pot - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "14bdb9d6-929d-1c24-345a-bb64d3e4d4da",
@@ -464,17 +433,9 @@
     "slug": "bookmark-minimal",
     "name": "Minimal Page Bookmark",
     "shortDescription": "Elegant bookmark with clip design",
-    "description": "Simple yet elegant bookmark that clips onto pages without damaging them. Perfect for readers and students.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Simple yet elegant bookmark that clips onto pages without damaging them. Perfect for readers and students.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
-    "images": [
-      {
-        "id": "f7937f2e-3d1e-86c6-d965-fb7065121e38",
-        "url": "/placeholders/product-bookmark.svg",
-        "altText": "Minimal bookmark - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "093fb4e2-f727-076d-932d-397128afe1f1",
@@ -517,17 +478,9 @@
     "slug": "tablet-stand-portable",
     "name": "Portable Tablet Stand",
     "shortDescription": "Foldable stand for tablets and e-readers",
-    "description": "Compact and portable stand for tablets. Adjustable angle, folds flat for travel.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Compact and portable stand for tablets. Adjustable angle, folds flat for travel.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
-    "images": [
-      {
-        "id": "78fb8250-be90-4273-0729-755beac468dd",
-        "url": "/placeholders/product-tablet-stand.svg",
-        "altText": "Portable tablet stand - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "8f671f76-ef4d-888d-e2ca-b028e23bcd9d",
@@ -586,17 +539,9 @@
     "slug": "pen-holder-hexagonal",
     "name": "Hexagonal Pen Holder",
     "shortDescription": "Geometric pen and pencil holder for desk",
-    "description": "Modern hexagonal design pen holder. Holds multiple pens, pencils, and markers.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Modern hexagonal design pen holder. Holds multiple pens, pencils, and markers.",
     "categoryId": "e70dd391-86ca-2ebf-2575-42987db7603a",
-    "images": [
-      {
-        "id": "5a0fd304-52c1-b3ca-7547-2eb820c172a1",
-        "url": "/placeholders/product-pen-holder.svg",
-        "altText": "Hexagonal pen holder - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "b5a955bc-eca3-6840-2d3b-c9f82c76ca83",
@@ -659,17 +604,9 @@
     "slug": "mechanical-model-educational",
     "name": "Mechanical Model - Lever System",
     "shortDescription": "Educational model demonstrating lever principles",
-    "description": "Interactive mechanical model for learning about levers and mechanical advantage. Perfect for students and educators.\n\nDEMO PRODUCT - Sample data for development purposes.",
+    "description": "Interactive mechanical model for learning about levers and mechanical advantage. Perfect for students and educators.",
     "categoryId": "5455d60b-4bb8-7e5f-0d04-b4c2aae36390",
-    "images": [
-      {
-        "id": "f15d42d0-ede0-219e-5156-7d99ce755191",
-        "url": "/placeholders/product-mechanical-model.svg",
-        "altText": "Lever system mechanical model - DEMO IMAGE",
-        "displayOrder": 1,
-        "isPrimary": true
-      }
-    ],
+    "images": [],
     "variants": [
       {
         "id": "3e2c26dc-4408-179b-0182-bd605f01ced2",

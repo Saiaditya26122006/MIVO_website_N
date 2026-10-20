@@ -519,10 +519,12 @@ describe("Product Data Integrity (products.json)", () => {
     }
   });
 
-  it("every product has at least 1 image with isPrimary === true", () => {
+  it("products with images have exactly 1 primary image", () => {
     for (const product of typedProducts) {
-      const primaryImages = product.images.filter((img) => img.isPrimary === true);
-      expect(primaryImages.length).toBeGreaterThanOrEqual(1);
+      if (product.images.length > 0) {
+        const primaryImages = product.images.filter((img) => img.isPrimary === true);
+        expect(primaryImages.length).toBe(1);
+      }
     }
   });
 

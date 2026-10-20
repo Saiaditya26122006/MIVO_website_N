@@ -1,12 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface Step {
   number: number;
   title: string;
   description: string;
   icon: React.ReactNode;
+  image?: string;
+  imageAlt?: string;
 }
 
 const steps: Step[] = [
@@ -14,6 +17,8 @@ const steps: Step[] = [
     number: 1,
     title: "Share Your Idea",
     description: "Tell us what you need. Upload sketches, CAD files, or just describe your vision. We'll work with you to understand the requirements.",
+    image: "/images/hero/idea-sketch.webp",
+    imageAlt: "Hand sketching a 3D part design with a lightbulb representing the initial idea",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -24,6 +29,8 @@ const steps: Step[] = [
     number: 2,
     title: "We Design",
     description: "Our team creates detailed CAD models based on your specifications. You'll receive previews and can request revisions until it's perfect.",
+    image: "/images/services/cad-design.webp",
+    imageAlt: "CAD design workspace with 3D model on laptop and technical drawings",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
@@ -34,6 +41,8 @@ const steps: Step[] = [
     number: 3,
     title: "We Print",
     description: "Using high-quality materials and precision 3D printing technology, we bring your design to life. Production typically takes 24-48 hours.",
+    image: "/images/hero/bambu-printing-gear.png",
+    imageAlt: "Bambu Lab A1 3D printer producing a green gear part",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -44,6 +53,8 @@ const steps: Step[] = [
     number: 4,
     title: "You Get It",
     description: "Your finished part is carefully packaged and shipped to your doorstep. We provide tracking and quality guarantees on every order.",
+    image: "/images/services/custom-parts.webp",
+    imageAlt: "Finished 3D printed custom parts including gears, brackets, and enclosures",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -121,9 +132,21 @@ export function HowItWorks() {
                   <span className="text-2xl font-bold text-ink">{step.number}</span>
                 </div>
 
-                {/* Icon Container */}
-                <div className="mb-6 mt-8 flex items-center justify-center h-48 bg-cream/50 rounded-2xl border-2 border-ink/10 text-ink/70 group-hover:text-lime transition-colors">
-                  {step.icon}
+                {/* Image / Icon Container */}
+                <div className="mb-6 mt-8 relative h-48 bg-cream/50 rounded-2xl border-2 border-ink/10 overflow-hidden">
+                  {step.image ? (
+                    <Image
+                      src={step.image}
+                      alt={step.imageAlt || step.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-ink/70 group-hover:text-lime transition-colors">
+                      {step.icon}
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
