@@ -145,7 +145,7 @@ body {
 }
 .bp-path-draw {
   stroke-dashoffset: 1;
-  animation: bp-draw 18s ease-in-out infinite;
+  animation: bp-draw 8s ease-in-out infinite;
 }
 
 @keyframes bp-flow-move {
@@ -156,7 +156,7 @@ body {
 }
 .bp-flow {
   opacity: 0;
-  animation: bp-flow-move 18s linear infinite;
+  animation: bp-flow-move 8s linear infinite;
 }
 
 @keyframes bp-float {
@@ -164,7 +164,7 @@ body {
   50%      { transform: translateY(-4px); }
 }
 .bp-float {
-  animation: bp-float 7s ease-in-out infinite;
+  animation: bp-float 4s ease-in-out infinite;
 }
 
 @keyframes bp-callout-cycle {
@@ -174,7 +174,7 @@ body {
 }
 .bp-callout {
   opacity: 0;
-  animation: bp-callout-cycle 20s ease-in-out infinite;
+  animation: bp-callout-cycle 10s ease-in-out infinite;
 }
 
 @keyframes bp-scan-pass {
@@ -184,8 +184,8 @@ body {
   100% { top: 100%; opacity: 0; }
 }
 .bp-scan {
-  animation: bp-scan-pass 6s ease-in-out infinite;
-  animation-delay: 3s;
+  animation: bp-scan-pass 3s ease-in-out infinite;
+  animation-delay: 1.5s;
 }
 
 @keyframes bp-vert-draw {
@@ -196,7 +196,7 @@ body {
   100% { transform: scaleY(0); opacity: 0; }
 }
 .bp-vert-line {
-  animation: bp-vert-draw 18s ease-in-out infinite;
+  animation: bp-vert-draw 8s ease-in-out infinite;
 }
 
 /* Accessibility: Reduced Motion Support */

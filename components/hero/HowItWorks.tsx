@@ -114,20 +114,9 @@ export function HowItWorks() {
             <path
               d={PROCESS_PATH}
               stroke="#101010"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-              opacity="0.08"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              d={PROCESS_PATH}
-              stroke="#B7FF2A"
               strokeWidth="2"
-              strokeLinecap="round"
-              pathLength="1"
-              strokeDasharray="1"
-              className="bp-path-draw"
-              opacity="0.45"
+              strokeDasharray="6 6"
+              opacity="0.15"
               vectorEffect="non-scaling-stroke"
             />
             <path
@@ -135,15 +124,26 @@ export function HowItWorks() {
               stroke="#B7FF2A"
               strokeWidth="3"
               strokeLinecap="round"
-              strokeDasharray="8 40"
+              pathLength="1"
+              strokeDasharray="1"
+              className="bp-path-draw"
+              opacity="0.6"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              d={PROCESS_PATH}
+              stroke="#B7FF2A"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeDasharray="12 40"
               className="bp-flow"
               vectorEffect="non-scaling-stroke"
             />
           </svg>
 
-          <div className="grid grid-cols-4 gap-x-10 relative">
+          <div className="grid grid-cols-4 gap-x-16 relative">
             {stages.map((stage, idx) => (
-              <div key={stage.number} className={`relative z-20 ${idx % 2 === 1 ? "pt-16" : ""}`}>
+              <div key={stage.number} className={`relative z-20 ${idx % 2 === 1 ? "pt-20" : ""}`}>
                 {/* Number + label */}
                 <div className="flex items-baseline gap-2 mb-3">
                   <span className="font-mono text-[26px] font-bold text-lime/45 leading-none">
@@ -156,7 +156,7 @@ export function HowItWorks() {
                 </div>
 
                 {/* Image with blueprint overlays */}
-                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bp-float" style={{ animationDelay: `${idx * 1.8}s` }}>
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bp-float" style={{ animationDelay: `${idx * 0.8}s` }}>
                   <Image
                     src={stage.image}
                     alt={stage.imageAlt}
@@ -179,7 +179,7 @@ export function HowItWorks() {
                 {/* Cycling callout */}
                 <p
                   className="font-mono text-[10px] tracking-wider text-lime/60 mb-2 h-4 bp-callout"
-                  style={{ animationDelay: `${idx * 5}s` }}
+                  style={{ animationDelay: `${idx * 2.5}s` }}
                   aria-hidden="true"
                 >
                   {stage.callout}
@@ -227,7 +227,7 @@ export function HowItWorks() {
                 </span>
 
                 {/* Image */}
-                <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-3 bp-float" style={{ animationDelay: `${idx * 1.8}s` }}>
+                <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-3 bp-float" style={{ animationDelay: `${idx * 0.8}s` }}>
                   <Image
                     src={stage.image}
                     alt={stage.imageAlt}
@@ -244,7 +244,7 @@ export function HowItWorks() {
                 {/* Callout */}
                 <p
                   className="font-mono text-[10px] tracking-wider text-lime/50 mb-1.5 bp-callout"
-                  style={{ animationDelay: `${idx * 5}s` }}
+                  style={{ animationDelay: `${idx * 2.5}s` }}
                   aria-hidden="true"
                 >
                   {stage.callout}
