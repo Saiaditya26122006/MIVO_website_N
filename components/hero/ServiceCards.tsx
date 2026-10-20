@@ -28,8 +28,8 @@ const services: Service[] = [
   {
     title: "Prototyping",
     description: "Rapid prototyping services to validate your concepts quickly. Iterate faster and bring products to market with confidence.",
-    image: "/images/services/prototyping.webp",
-    altText: "3D printed electronics prototype enclosure with ventilation and mounting points",
+    image: "/images/services/prototyping-robot.jpg",
+    altText: "3D printed robotic arm prototype with servo motors and electronic components",
     href: "/explore?category=prototypes",
   },
   {
@@ -80,6 +80,8 @@ export function ServiceCards() {
               <div className={`relative overflow-hidden ${
                 service.title === "CAD Design"
                   ? "aspect-[16/10] bg-ink"
+                  : service.title === "Prototyping"
+                  ? "aspect-[4/5] bg-cream/50"
                   : "aspect-square bg-cream/50"
               }`}>
                 <Image
