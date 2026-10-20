@@ -19,16 +19,16 @@ export default async function HomePage() {
       {/* Main Content - Add pt-20 to account for fixed navigation */}
       <main className="flex-1 pt-20">
         {/* Hero Section */}
-        <section className="py-16 md:py-24">
+        <section className="py-8 md:py-12">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               {/* Left Column - Hero Text */}
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div>
-                  <p className="text-sm font-medium text-ink/60 uppercase tracking-wide mb-4">
+                  <p className="text-sm font-medium text-ink/60 uppercase tracking-wide mb-3">
                     Ideas, Sketches, Projects, Problems
                   </p>
-                  <h1 className="font-handwritten text-5xl md:text-7xl font-bold text-ink leading-tight">
+                  <h1 className="font-handwritten text-5xl md:text-6xl font-bold text-ink leading-tight">
                     Your ideas.{" "}
                     <span className="relative inline-block">
                       <span className="relative z-10">Designed.</span>
@@ -41,7 +41,7 @@ export default async function HomePage() {
                   </h1>
                 </div>
 
-                <p className="text-lg md:text-xl text-ink/80 max-w-xl">
+                <p className="text-lg text-ink/80 max-w-xl">
                   Transform your concepts into physical objects with precision 3D printing
                   and expert CAD design. From prototypes to production parts.
                 </p>
