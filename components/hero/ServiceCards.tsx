@@ -77,12 +77,18 @@ export function ServiceCards() {
               className="group block bg-white border-2 border-ink/10 rounded-2xl overflow-hidden hover:border-lime hover:shadow-xl transition-all duration-300"
             >
               {/* Image Container */}
-              <div className="aspect-square bg-cream/50 relative overflow-hidden">
+              <div className={`relative overflow-hidden ${
+                service.title === "CAD Design"
+                  ? "aspect-[16/10] bg-ink"
+                  : "aspect-square bg-cream/50"
+              }`}>
                 <Image
                   src={service.image}
                   alt={service.altText}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className={`group-hover:scale-105 transition-transform duration-300 ${
+                    service.title === "CAD Design" ? "object-contain" : "object-cover"
+                  }`}
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
 
