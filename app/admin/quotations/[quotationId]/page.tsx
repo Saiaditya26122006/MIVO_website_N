@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { updateQuotationStatus, type QuotationStatus } from "../actions";
+import { updateQuotationStatus, createOrUpdateQuote, type QuotationStatus } from "../actions";
 
 interface QuotationData {
   id: string;
@@ -32,6 +32,20 @@ interface QuotationData {
   requiredByDate: string | null;
   additionalNotes: string | null;
   createdAt: string;
+}
+
+interface QuoteData {
+  id: string;
+  itemDescription: string;
+  quantityQuoted: number;
+  unitPricePaise: number;
+  subtotalPaise: number;
+  shippingPaise: number;
+  totalPricePaise: number;
+  estimatedProductionDays: number;
+  validUntilDate: string;
+  internalNotes: string | null;
+  customerFacingNotes: string | null;
 }
 
 function formatPrice(paise: number): string {
@@ -73,10 +87,26 @@ export default function AdminQuotationDetailPage() {
   const quotationId = params.quotationId as string;
 
   const [quotation, setQuotation] = useState<QuotationData | null>(null);
+  const [existingQuote, setExistingQuote] = useState<QuoteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [savingQuote, setSavingQuote] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
+  // Quote form state
+  const [quoteForm, setQuoteForm] = useState({
+    itemDescription: "",
+    quantityQuoted: 1,
+    unitPrice: 0, // in rupees
+    shipping: 100, // in rupees
+    productionDays: 2,
+    validUntilDays: 7,
+    internalNotes: "",
+    customerNotes: "",
+  });
 
   useEffect(() => {
     async function loadQuotation() {
@@ -140,6 +170,44 @@ export default function AdminQuotationDetailPage() {
         additionalNotes: data.additional_notes,
         createdAt: data.created_at,
       });
+
+      // Load existing quote if any
+      const { data: quoteData } = await supabase
+        .from("quotation_quotes")
+        .select("*")
+        .eq("quotation_id", quotationId)
+        .single();
+
+      if (quoteData) {
+        setExistingQuote({
+          id: quoteData.id,
+          itemDescription: quoteData.item_description,
+          quantityQuoted: quoteData.quantity_quoted,
+          unitPricePaise: quoteData.unit_price_paise,
+          subtotalPaise: quoteData.subtotal_paise,
+          shippingPaise: quoteData.shipping_paise,
+          totalPricePaise: quoteData.total_price_paise,
+          estimatedProductionDays: quoteData.estimated_production_days,
+          validUntilDate: quoteData.valid_until_date,
+          internalNotes: quoteData.internal_notes,
+          customerFacingNotes: quoteData.customer_facing_notes,
+        });
+
+        // Prefill form with existing quote
+        setQuoteForm({
+          itemDescription: quoteData.item_description,
+          quantityQuoted: quoteData.quantity_quoted,
+          unitPrice: quoteData.unit_price_paise / 100,
+          shipping: quoteData.shipping_paise / 100,
+          productionDays: quoteData.estimated_production_days,
+          validUntilDays: 7,
+          internalNotes: quoteData.internal_notes || "",
+          customerNotes: quoteData.customer_facing_notes || "",
+        });
+      } else {
+        // Pre-fill with customer's requested quantity
+        setQuoteForm((f) => ({ ...f, quantityQuoted: data.quantity }));
+      }
 
       setLoading(false);
     }
