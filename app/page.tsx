@@ -48,12 +48,12 @@ export default async function HomePage() {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link href="/explore">
-                    <Button variant="accent" size="lg" className="rounded-xl">
+                    <Button variant="accent" size="lg">
                       Explore Models
                     </Button>
                   </Link>
                   <Link href="/custom">
-                    <Button variant="secondary" size="lg" className="rounded-xl">
+                    <Button variant="secondary" size="lg">
                       Start a Custom Project
                     </Button>
                   </Link>
@@ -102,7 +102,7 @@ export default async function HomePage() {
               {/* CTA Button */}
               <div className="text-center">
                 <Link href="/explore">
-                  <Button variant="accent" size="lg" className="rounded-xl">
+                  <Button variant="accent" size="lg" className="">
                     View All Models
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -136,7 +136,7 @@ export default async function HomePage() {
               your requirements and provide a detailed proposal within 24 hours.
             </p>
             <Link href="/custom">
-              <Button variant="accent" size="lg" className="rounded-xl">
+              <Button variant="accent" size="lg" className="">
                 Get a Free Quote
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

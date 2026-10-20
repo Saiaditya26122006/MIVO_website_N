@@ -34,16 +34,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
 
     const variantStyles = {
-      primary: "bg-ink text-cream hover:shadow-lg",
-      secondary: "bg-cream text-ink border-2 border-ink hover:bg-ink hover:text-cream",
-      accent: "bg-lime text-ink hover:shadow-xl",
-      ghost: "bg-transparent text-ink hover:bg-ink/5",
+      primary: "bg-ink text-cream hover:shadow-lg rounded-xl",
+      secondary: "bg-transparent text-ink border-2 border-ink hover:bg-ink hover:text-cream rounded-xl",
+      accent: "bg-lime text-ink hover:shadow-[0_8px_30px_rgb(183,255,42,0.3)] rounded-full shadow-[0_4px_14px_rgb(183,255,42,0.2)]",
+      ghost: "bg-transparent text-ink hover:bg-ink/5 rounded-xl",
     };
 
     const sizeStyles = {
-      sm: "px-4 py-2 text-sm rounded-lg",
-      md: "px-6 py-3 text-base rounded-xl",
-      lg: "px-8 py-4 text-lg rounded-xl",
+      sm: "px-4 py-2 text-sm",
+      md: "px-6 py-3 text-base",
+      lg: "px-8 py-4 text-lg",
     };
 
     return (
