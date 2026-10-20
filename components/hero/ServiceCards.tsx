@@ -82,6 +82,8 @@ export function ServiceCards() {
                   ? "aspect-[16/10] bg-ink"
                   : service.title === "Prototyping"
                   ? "aspect-[4/5] bg-cream/50"
+                  : service.title === "Custom Parts"
+                  ? "aspect-[16/10] bg-ink/5"
                   : "aspect-square bg-cream/50"
               }`}>
                 <Image
@@ -89,7 +91,9 @@ export function ServiceCards() {
                   alt={service.altText}
                   fill
                   className={`group-hover:scale-105 transition-transform duration-300 ${
-                    service.title === "CAD Design" ? "object-contain" : "object-cover"
+                    service.title === "CAD Design" || service.title === "Custom Parts"
+                      ? "object-contain"
+                      : "object-cover"
                   }`}
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
