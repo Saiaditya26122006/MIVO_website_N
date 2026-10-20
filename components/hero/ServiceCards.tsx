@@ -14,8 +14,8 @@ const services: Service[] = [
   {
     title: "3D Printing",
     description: "High-precision additive manufacturing with a wide range of materials and finishes. Perfect for prototypes and production parts.",
-    image: "/images/services/3d-printing.webp",
-    altText: "3D printer creating a precision part with green PLA filament",
+    image: "/images/services/3d-printing-bambu.jpg",
+    altText: "Bambu Lab A1 3D printer with panda models and bamboo decorations",
     href: "/explore?category=functional-parts",
   },
   {
