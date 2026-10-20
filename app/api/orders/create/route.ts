@@ -152,7 +152,23 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       subtotalPaise += lineTotalPaise;
     }
 
-    const shippingPaise = 10000; // ₹100 flat rate
+    // Get shipping rate from database settings
+    const { data: shippingSettings } = await supabase
+      .from("shipping_settings")
+      .select("flat_rate_paise, free_shipping_threshold_paise")
+      .eq("is_active", true)
+      .single();
+
+    let shippingPaise = shippingSettings?.flat_rate_paise || 10000; // default ₹100
+
+    // Apply free shipping threshold if configured
+    if (
+      shippingSettings?.free_shipping_threshold_paise &&
+      subtotalPaise >= shippingSettings.free_shipping_threshold_paise
+    ) {
+      shippingPaise = 0;
+    }
+
     const totalPaise = subtotalPaise + shippingPaise;
 
     const effectiveIdempotencyKey =

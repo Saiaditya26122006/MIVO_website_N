@@ -28,15 +28,29 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue({
     auth: { getUser: () => mockGetUser() },
     rpc: (...args: unknown[]) => mockRpc(...args),
-    from: () => ({
-      select: () => ({
-        eq: () => ({
+    from: (table: string) => {
+      if (table === "shipping_settings") {
+        return {
+          select: () => ({
+            eq: () => ({
+              single: () => Promise.resolve({
+                data: { flat_rate_paise: 10000, free_shipping_threshold_paise: null },
+                error: null
+              }),
+            }),
+          }),
+        };
+      }
+      return {
+        select: () => ({
           eq: () => ({
-            single: () => mockSingle(),
+            eq: () => ({
+              single: () => mockSingle(),
+            }),
           }),
         }),
-      }),
-    }),
+      };
+    },
   }),
 }));
 
