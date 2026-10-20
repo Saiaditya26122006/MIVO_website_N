@@ -252,14 +252,74 @@ export default function EditProductPage() {
 
   async function handleDeleteImage(index: number) {
     const image = images[index];
+
+    // Only call server action if the image has been saved to database
     if (image.id) {
+      setError(null);
       const result = await deleteProductImage(image.id, image.url);
       if (!result.success) {
         setError(result.error || "Failed to delete image");
         return;
       }
     }
-    setImages(images.filter((_, i) => i !== index));
+
+    // Remove from local state
+    const newImages = images.filter((_, i) => i !== index);
+
+    // If deleted image was primary, make first remaining image primary
+    if (image.isPrimary && newImages.length > 0) {
+      newImages[0].isPrimary = true;
+    }
+
+    setImages(newImages);
+  }
+
+  async function handleReplaceImage(index: number, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be less than 5MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    setError(null);
+
+    // Delete old image if it exists in database
+    const oldImage = images[index];
+    if (oldImage.id) {
+      await deleteProductImage(oldImage.id, oldImage.url);
+    }
+
+    // Upload new image
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await uploadProductImage(productId, formData);
+
+    if (!result.success) {
+      setError(result.error || "Failed to upload image");
+      setUploadingImage(false);
+      return;
+    }
+
+    // Replace in images list
+    const newImages = [...images];
+    newImages[index] = {
+      url: result.url!,
+      altText: product.name,
+      displayOrder: index,
+      isPrimary: oldImage.isPrimary,
+    };
+    setImages(newImages);
+
+    setUploadingImage(false);
+    e.target.value = "";
   }
 
   async function handleSubmit() {
@@ -347,11 +407,11 @@ export default function EditProductPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                   {images.map((image, index) => (
-                    <div key={index} className="relative group">
+                    <div key={index} className="relative group border-2 border-ink/10 rounded-lg overflow-hidden">
                       <img
                         src={image.url}
                         alt={image.altText}
-                        className="w-full h-40 object-cover rounded-lg border-2 border-ink/10"
+                        className="w-full h-40 object-cover"
                       />
                       {image.isPrimary && (
                         <div className="absolute top-2 left-2 bg-lime text-ink text-xs font-medium px-2 py-1 rounded">
@@ -360,11 +420,14 @@ export default function EditProductPage() {
                       )}
                       <button
                         onClick={() => handleDeleteImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        disabled={uploadingImage}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                        title="Delete image"
                       >
-                        ×
+                        Delete
                       </button>
-                      <div className="mt-2 flex gap-2">
+
+                      <div className="p-2 bg-white border-t-2 border-ink/10 flex flex-wrap gap-2">
                         <button
                           onClick={() => {
                             const newImages = images.map((img, i) => ({
@@ -373,10 +436,22 @@ export default function EditProductPage() {
                             }));
                             setImages(newImages);
                           }}
-                          className="text-xs text-ink/60 hover:text-lime"
+                          disabled={image.isPrimary}
+                          className="text-xs text-ink/60 hover:text-lime disabled:text-ink/30 disabled:cursor-not-allowed"
                         >
-                          Set as primary
+                          {image.isPrimary ? "✓ Primary" : "Set as primary"}
                         </button>
+
+                        <label className="text-xs text-lime hover:text-lime/80 cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleReplaceImage(index, e)}
+                            disabled={uploadingImage}
+                            className="hidden"
+                          />
+                          Replace
+                        </label>
                       </div>
                     </div>
                   ))}

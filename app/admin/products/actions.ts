@@ -526,28 +526,46 @@ export async function deleteProductImage(
 
     const supabase = await createClient();
 
-    // Extract file path from URL
-    const url = new URL(imageUrl);
-    const pathParts = url.pathname.split("/product-images/");
-    const filePath = pathParts[1];
+    console.log("[Admin] Deleting image:", { imageId, imageUrl });
 
-    if (filePath) {
-      // Delete from storage
-      await supabase.storage.from("product-images").remove([filePath]);
+    // Delete from database first
+    const { error: dbError } = await supabase
+      .from("product_images")
+      .delete()
+      .eq("id", imageId);
+
+    if (dbError) {
+      console.error("[Admin] Failed to delete image record:", dbError);
+      return { success: false, error: `Failed to delete image: ${dbError.message}` };
     }
 
-    // Delete from database
-    const { error } = await supabase.from("product_images").delete().eq("id", imageId);
+    // Extract file path from URL and delete from storage
+    try {
+      const url = new URL(imageUrl);
+      const pathParts = url.pathname.split("/product-images/");
+      const filePath = pathParts[1];
 
-    if (error) {
-      console.error("[Admin] Failed to delete image record:", error);
-      return { success: false, error: `Database error: ${error.message}` };
+      if (filePath) {
+        console.log("[Admin] Deleting file from storage:", filePath);
+        const { error: storageError } = await supabase.storage
+          .from("product-images")
+          .remove([filePath]);
+
+        if (storageError) {
+          console.error("[Admin] Storage deletion warning:", storageError);
+          // Continue anyway - database record is already deleted
+        }
+      }
+    } catch (urlError) {
+      console.error("[Admin] Failed to parse image URL:", urlError);
+      // Continue anyway - database record is deleted
     }
 
+    console.log("[Admin] Image deleted successfully:", imageId);
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error("[Admin] Delete image failed:", message);
+    console.error("[Admin] Delete image failed:", message, error);
     return {
       success: false,
       error: message.includes("Admin") ? "Unauthorized" : "Failed to delete image",
