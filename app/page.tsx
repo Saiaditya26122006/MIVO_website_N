@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default async function HomePage() {
   const allProducts = await getProducts();
-  const featuredProducts = allProducts.filter((p) => p.featured).slice(0, 3);
+  const featuredProducts = allProducts.filter((p) => p.featured).slice(0, 5);
 
   return (
     <>
@@ -93,7 +93,7 @@ export default async function HomePage() {
               </div>
 
               {/* Products Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
                 {featuredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

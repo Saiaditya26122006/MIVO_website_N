@@ -60,28 +60,28 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        <div className="text-sm text-ink/60 font-medium mb-2">
+      <div className="p-4">
+        <div className="text-xs text-ink/60 font-medium mb-1.5">
           {product.category.name}
         </div>
 
-        <h3 className="font-semibold text-lg text-ink mb-2 line-clamp-2 group-hover:text-ink/80 transition-colors">
+        <h3 className="font-semibold text-base text-ink mb-2 line-clamp-2 group-hover:text-ink/80 transition-colors">
           {product.name}
         </h3>
 
-        <p className="text-sm text-ink/70 mb-4 line-clamp-2">
+        <p className="text-xs text-ink/70 mb-3 line-clamp-2">
           {product.shortDescription}
         </p>
 
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm text-ink/60">Starting from</div>
-            <div className="text-2xl font-bold text-ink">{formatPrice(lowestPrice)}</div>
+            <div className="text-xs text-ink/60">Starting from</div>
+            <div className="text-xl font-bold text-ink">{formatPrice(lowestPrice)}</div>
           </div>
 
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-lime group-hover:translate-x-1 transition-transform"
+            className="h-5 w-5 text-lime group-hover:translate-x-1 transition-transform"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
