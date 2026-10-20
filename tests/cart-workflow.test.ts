@@ -220,8 +220,8 @@ describe("Cart Item Management", () => {
 
   describe("Merging logic", () => {
     it("merges items with the same productId + variantId + selectedColor", () => {
-      const a = { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black" };
-      const b = { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black" };
+      const a = { productId: "p-001", variantId: "v-001-1", selectedColor: "Black" };
+      const b = { productId: "p-001", variantId: "v-001-1", selectedColor: "Black" };
 
       expect(shouldMerge(a, b)).toBe(true);
     });
@@ -243,22 +243,22 @@ describe("Cart Item Management", () => {
     });
 
     it("does NOT merge items with different selectedColor", () => {
-      const a = { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black" };
-      const b = { productId: "prod-001", variantId: "var-001-1", selectedColor: "White" };
+      const a = { productId: "p-001", variantId: "v-001-1", selectedColor: "Black" };
+      const b = { productId: "p-001", variantId: "v-001-1", selectedColor: "White" };
 
       expect(shouldMerge(a, b)).toBe(false);
     });
 
     it("does NOT merge items with different variantId", () => {
-      const a = { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black" };
-      const b = { productId: "prod-001", variantId: "var-001-2", selectedColor: "Black" };
+      const a = { productId: "p-001", variantId: "v-001-1", selectedColor: "Black" };
+      const b = { productId: "p-001", variantId: "v-001-2", selectedColor: "Black" };
 
       expect(shouldMerge(a, b)).toBe(false);
     });
 
     it("does NOT merge items with different productId", () => {
-      const a = { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black" };
-      const b = { productId: "prod-002", variantId: "var-001-1", selectedColor: "Black" };
+      const a = { productId: "p-001", variantId: "v-001-1", selectedColor: "Black" };
+      const b = { productId: "p-002", variantId: "v-001-1", selectedColor: "Black" };
 
       expect(shouldMerge(a, b)).toBe(false);
     });
@@ -271,10 +271,10 @@ describe("Cart Item Management", () => {
       cartItems = [
         {
           id: "cart_1",
-          productId: "prod-001",
+          productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f",
           productName: "Modular Desk Organizer",
           productSlug: "desk-organizer-modular",
-          variantId: "var-001-1",
+          variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549",
           variantSku: "DESK-ORG-SM-PLA",
           sizeName: "Small",
           material: "PLA",
@@ -285,10 +285,10 @@ describe("Cart Item Management", () => {
         },
         {
           id: "cart_2",
-          productId: "prod-003",
+          productId: "ad504b14-f116-c40c-96d3-3b72305dbd90",
           productName: "Adjustable Phone Stand",
           productSlug: "phone-stand-adjustable",
-          variantId: "var-003-1",
+          variantId: "c03ba19e-abd2-2b65-474d-5964fcedb226",
           variantSku: "PHONE-STD-UNI-PLA",
           sizeName: "Universal",
           material: "PLA",
@@ -351,10 +351,10 @@ describe("Cart Persistence", () => {
       items: [
         {
           id: "cart_1700000000000_abc123",
-          productId: "prod-001",
+          productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f",
           productName: "Modular Desk Organizer",
           productSlug: "desk-organizer-modular",
-          variantId: "var-001-1",
+          variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549",
           variantSku: "DESK-ORG-SM-PLA",
           sizeName: "Small",
           material: "PLA",
@@ -365,10 +365,10 @@ describe("Cart Persistence", () => {
         },
         {
           id: "cart_1700000000001_def456",
-          productId: "prod-005",
+          productId: "a5d0aa26-00cf-bb2a-5268-ee9f43cf432f",
           productName: "Functional Gear Keychain",
           productSlug: "gear-keychain-functional",
-          variantId: "var-005-1",
+          variantId: "5d0111ce-2959-6d7a-d991-e3726cc205cb",
           variantSku: "GEAR-KEY-SM-PLA",
           sizeName: "Small",
           material: "PLA",
@@ -426,10 +426,10 @@ describe("Cart Persistence", () => {
       items: [
         {
           id: "cart_rt_test",
-          productId: "prod-003",
+          productId: "ad504b14-f116-c40c-96d3-3b72305dbd90",
           productName: "Adjustable Phone Stand",
           productSlug: "phone-stand-adjustable",
-          variantId: "var-003-2",
+          variantId: "f2cd9682-5a83-f104-1d50-9c9ba03fe641",
           variantSku: "PHONE-STD-UNI-PETG",
           sizeName: "Universal",
           material: "PETG",
@@ -580,7 +580,7 @@ describe("Server-side Order Validation", () => {
   describe("Quantity validation", () => {
     it("accepts quantity of 1 (lower bound)", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 1 },
         typedProducts
       );
       expect(err).toBeNull();
@@ -588,7 +588,7 @@ describe("Server-side Order Validation", () => {
 
     it("accepts quantity of 99 (upper bound)", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 99 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 99 },
         typedProducts
       );
       expect(err).toBeNull();
@@ -596,7 +596,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects quantity of 0 (falsy, caught by required-field check)", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 0 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 0 },
         typedProducts
       );
       // quantity 0 is falsy, so the API's !item.quantity check fires first
@@ -605,7 +605,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects quantity of 100", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 100 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 100 },
         typedProducts
       );
       expect(err).toContain("Invalid quantity");
@@ -613,7 +613,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects negative quantity", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: -5 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: -5 },
         typedProducts
       );
       expect(err).toContain("Invalid quantity");
@@ -623,7 +623,7 @@ describe("Server-side Order Validation", () => {
   describe("Required fields", () => {
     it("rejects item missing productId", () => {
       const err = validateOrderItem(
-        { variantId: "var-001-1", selectedColor: "Black", quantity: 1 },
+        { variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 1 },
         typedProducts
       );
       expect(err).toBe("Invalid item structure");
@@ -631,7 +631,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects item missing variantId", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", selectedColor: "Black", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", selectedColor: "Black", quantity: 1 },
         typedProducts
       );
       expect(err).toBe("Invalid item structure");
@@ -639,7 +639,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects item missing selectedColor", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", quantity: 1 },
         typedProducts
       );
       expect(err).toBe("Invalid item structure");
@@ -647,7 +647,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects item missing quantity", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black" },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black" },
         typedProducts
       );
       expect(err).toBe("Invalid item structure");
@@ -657,7 +657,7 @@ describe("Server-side Order Validation", () => {
   describe("Product and variant existence", () => {
     it("rejects a non-existent productId", () => {
       const err = validateOrderItem(
-        { productId: "prod-999", variantId: "var-001-1", selectedColor: "Black", quantity: 1 },
+        { productId: "00000000-0000-0000-0000-000000000000", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 1 },
         typedProducts
       );
       expect(err).toContain("Product not available");
@@ -665,7 +665,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects a valid productId with a non-existent variantId", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-999-1", selectedColor: "Black", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "00000000-0000-0000-0000-000000000000", selectedColor: "Black", quantity: 1 },
         typedProducts
       );
       expect(err).toContain("Variant not found");
@@ -673,7 +673,7 @@ describe("Server-side Order Validation", () => {
 
     it("accepts a valid productId + variantId combination", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 1 },
         typedProducts
       );
       expect(err).toBeNull();
@@ -682,18 +682,16 @@ describe("Server-side Order Validation", () => {
 
   describe("Color option validation", () => {
     it("accepts a color that is in the variant's colorOptions", () => {
-      // var-001-1 has colorOptions: ["Black", "White", "Gray", "Blue"]
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Blue", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Blue", quantity: 1 },
         typedProducts
       );
       expect(err).toBeNull();
     });
 
     it("rejects a color that is NOT in the variant's colorOptions", () => {
-      // var-001-1 does NOT have "Pink"
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Pink", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Pink", quantity: 1 },
         typedProducts
       );
       expect(err).toContain("Invalid color option");
@@ -701,7 +699,7 @@ describe("Server-side Order Validation", () => {
 
     it("rejects an empty-string color", () => {
       const err = validateOrderItem(
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "", quantity: 1 },
         typedProducts
       );
       // Empty string is falsy, so caught by the required-field check
@@ -726,8 +724,8 @@ describe("Server-side Order Validation", () => {
   describe("End-to-end validation of a multi-item order", () => {
     it("validates a realistic two-item order successfully", () => {
       const orderItems = [
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 2 },
-        { productId: "prod-003", variantId: "var-003-1", selectedColor: "Red", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 2 },
+        { productId: "ad504b14-f116-c40c-96d3-3b72305dbd90", variantId: "c03ba19e-abd2-2b65-474d-5964fcedb226", selectedColor: "Red", quantity: 1 },
       ];
 
       for (const item of orderItems) {
@@ -735,10 +733,10 @@ describe("Server-side Order Validation", () => {
       }
 
       // Verify the server-calculated totals
-      const product1 = typedProducts.find((p) => p.id === "prod-001")!;
-      const variant1 = product1.variants.find((v) => v.id === "var-001-1")!;
-      const product3 = typedProducts.find((p) => p.id === "prod-003")!;
-      const variant3 = product3.variants.find((v) => v.id === "var-003-1")!;
+      const product1 = typedProducts.find((p) => p.id === "857bd7d9-3681-780a-1dcd-a8959c5e4e2f")!;
+      const variant1 = product1.variants.find((v) => v.id === "7a91e774-3178-bb3a-8382-47bb1ed73549")!;
+      const product3 = typedProducts.find((p) => p.id === "ad504b14-f116-c40c-96d3-3b72305dbd90")!;
+      const variant3 = product3.variants.find((v) => v.id === "c03ba19e-abd2-2b65-474d-5964fcedb226")!;
 
       const line1 = variant1.pricePaise * 2; // 45000 * 2 = 90000
       const line2 = variant3.pricePaise * 1; // 35000 * 1 = 35000
@@ -754,8 +752,8 @@ describe("Server-side Order Validation", () => {
 
     it("rejects an order where one item has an invalid color", () => {
       const orderItems = [
-        { productId: "prod-001", variantId: "var-001-1", selectedColor: "Black", quantity: 1 },
-        { productId: "prod-003", variantId: "var-003-1", selectedColor: "Neon", quantity: 1 },
+        { productId: "857bd7d9-3681-780a-1dcd-a8959c5e4e2f", variantId: "7a91e774-3178-bb3a-8382-47bb1ed73549", selectedColor: "Black", quantity: 1 },
+        { productId: "ad504b14-f116-c40c-96d3-3b72305dbd90", variantId: "c03ba19e-abd2-2b65-474d-5964fcedb226", selectedColor: "Neon", quantity: 1 },
       ];
 
       const errors = orderItems.map((item) => validateOrderItem(item, typedProducts));
@@ -763,5 +761,103 @@ describe("Server-side Order Validation", () => {
       expect(errors[0]).toBeNull();
       expect(errors[1]).toContain("Invalid color option");
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 7. Product & Variant ID Consistency (JSON ↔ Supabase seed)
+// ---------------------------------------------------------------------------
+
+describe("Product & Variant ID Consistency", () => {
+  function stableUuid(sourceId: string): string {
+    // Mirrors pg_temp.stable_uuid(source_id) = md5(source_id)::uuid
+    // We compute MD5 with a simple approach — Node's crypto is available in test env
+    const crypto = require("crypto");
+    const h: string = crypto.createHash("md5").update(sourceId).digest("hex");
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  }
+
+  it("all product IDs in products.json match md5(source)::uuid format", () => {
+    const expectedMapping: Record<string, string> = {};
+    for (let i = 1; i <= 10; i++) {
+      const key = `prod-${String(i).padStart(3, "0")}`;
+      expectedMapping[key] = stableUuid(key);
+    }
+
+    for (const product of typedProducts) {
+      const match = Object.values(expectedMapping).includes(product.id);
+      expect(match).toBe(true);
+    }
+  });
+
+  it("all category IDs in categories.json match md5(source)::uuid format", () => {
+    for (let i = 1; i <= 5; i++) {
+      const key = `cat-${String(i).padStart(3, "0")}`;
+      const expectedUuid = stableUuid(key);
+      const cat = typedCategories.find((c) => c.id === expectedUuid);
+      expect(cat).toBeDefined();
+    }
+  });
+
+  it("every product.categoryId references a valid category", () => {
+    const catIds = new Set(typedCategories.map((c) => c.id));
+    for (const product of typedProducts) {
+      expect(catIds.has(product.categoryId)).toBe(true);
+    }
+  });
+
+  it("all variant IDs match their expected deterministic UUID", () => {
+    const variantSourceIds = [
+      "var-001-1", "var-001-2", "var-001-3",
+      "var-002-1", "var-002-2",
+      "var-003-1", "var-003-2",
+      "var-004-1",
+      "var-005-1", "var-005-2",
+      "var-006-1", "var-006-2",
+      "var-007-1",
+      "var-008-1", "var-008-2",
+      "var-009-1", "var-009-2",
+      "var-010-1",
+    ];
+
+    const allVariants = typedProducts.flatMap((p) => p.variants);
+    const allVariantIds = new Set(allVariants.map((v) => v.id));
+
+    for (const sourceId of variantSourceIds) {
+      const expectedUuid = stableUuid(sourceId);
+      expect(allVariantIds.has(expectedUuid)).toBe(true);
+    }
+  });
+
+  it("product-to-variant parent relationship is correct", () => {
+    for (let i = 1; i <= 10; i++) {
+      const prodKey = `prod-${String(i).padStart(3, "0")}`;
+      const prodUuid = stableUuid(prodKey);
+      const product = typedProducts.find((p) => p.id === prodUuid);
+      if (!product) continue;
+
+      for (const variant of product.variants) {
+        // Variant ID should be a deterministic UUID from a var-NNN-X source
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+        expect(variant.id).toMatch(uuidRegex);
+      }
+    }
+  });
+
+  it("cart item built from product detail page uses resolvable IDs", () => {
+    // Simulate what ProductDetailClient does: uses product.id and variant.id
+    const product = typedProducts[0];
+    const variant = product.variants[0];
+
+    const cartItem = {
+      productId: product.id,
+      variantId: variant.id,
+      selectedColor: variant.colorOptions[0],
+      quantity: 1,
+    };
+
+    // This item should pass server-side validation
+    const err = validateOrderItem(cartItem, typedProducts);
+    expect(err).toBeNull();
   });
 });

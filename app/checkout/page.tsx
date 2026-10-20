@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -28,6 +28,7 @@ export default function CheckoutPage() {
   );
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const orderCompleteRef = useRef(false);
 
   const [formData, setFormData] = useState<CheckoutFormData>({
     customerName: "",
@@ -51,7 +52,6 @@ export default function CheckoutPage() {
       } = await supabase.auth.getUser();
 
       if (!authUser) {
-        // Redirect to login with return URL
         router.push("/auth/login?redirect=/checkout");
         return;
       }
@@ -88,16 +88,18 @@ export default function CheckoutPage() {
     loadUserAndProfile();
   }, [router]);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty — but only when the user hasn't just placed an
+  // order.  After a successful submit we call clearCart() then router.push()
+  // to the order page.  Without the guard the empty-cart watcher would fire
+  // first and redirect to /cart, hijacking the success redirect.
   useEffect(() => {
-    if (!loading && cart.items.length === 0) {
+    if (!loading && cart.items.length === 0 && !orderCompleteRef.current) {
       router.push("/cart");
     }
   }, [cart.items.length, loading, router]);
 
   function handleInputChange(field: keyof CheckoutFormData, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors((prev) => {
         const updated = { ...prev };
@@ -160,7 +162,6 @@ export default function CheckoutPage() {
     setSubmitting(true);
 
     try {
-      // Call API route to create order with server-side validation
       const response = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -185,7 +186,9 @@ export default function CheckoutPage() {
         throw new Error(result.error || "Failed to create order");
       }
 
-      // Clear cart and redirect to order confirmation
+      // Mark order complete BEFORE clearing cart so the empty-cart
+      // redirect guard doesn't hijack navigation.
+      orderCompleteRef.current = true;
       clearCart();
       router.push(`/account/orders/${result.orderId}`);
     } catch (err) {
@@ -209,7 +212,7 @@ export default function CheckoutPage() {
   }
 
   if (!user) {
-    return null; // Will redirect to login
+    return null;
   }
 
   return (

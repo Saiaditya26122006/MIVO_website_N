@@ -5,7 +5,7 @@
 
 -- Categories Table
 CREATE TABLE IF NOT EXISTS public.categories (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   slug TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL DEFAULT '',
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.categories (
 
 -- Products Table
 CREATE TABLE IF NOT EXISTS public.products (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   short_description TEXT NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS public.products (
 
 -- Product Variants (Size + Material combinations)
 CREATE TABLE IF NOT EXISTS public.product_variants (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
   sku TEXT NOT NULL UNIQUE,
   size_name TEXT NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.product_variants (
 
 -- Product Images
 CREATE TABLE IF NOT EXISTS public.product_images (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
   alt_text TEXT,
@@ -127,22 +127,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_product_images_one_primary
 
 -- Validate image URLs (basic format check)
 ALTER TABLE public.product_images
-  ADD CONSTRAINT IF NOT EXISTS check_image_url_format
+  ADD CONSTRAINT check_image_url_format
   CHECK (url ~ '^(https?://|/)');
-
--- Validate positive dimensions
-ALTER TABLE public.product_variants
-  ADD CONSTRAINT IF NOT EXISTS check_positive_length CHECK (length_mm > 0);
-
-ALTER TABLE public.product_variants
-  ADD CONSTRAINT IF NOT EXISTS check_positive_width CHECK (width_mm > 0);
-
-ALTER TABLE public.product_variants
-  ADD CONSTRAINT IF NOT EXISTS check_positive_height CHECK (height_mm > 0);
-
--- Validate non-negative prices
-ALTER TABLE public.product_variants
-  ADD CONSTRAINT IF NOT EXISTS check_nonnegative_price CHECK (price_paise >= 0);
 
 -- Validation: Ensure every published product has at least one variant
 -- (Enforced at application level for now, can add CHECK constraint)

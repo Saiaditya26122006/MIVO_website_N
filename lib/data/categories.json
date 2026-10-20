@@ -1,6 +1,6 @@
 [
   {
-    "id": "cat-001",
+    "id": "ec198ec9-b537-283e-a030-2ef0e066a1f9",
     "name": "Functional Parts",
     "slug": "functional-parts",
     "description": "Practical 3D printed components for everyday use and mechanical applications",
@@ -8,7 +8,7 @@
     "sortOrder": 1
   },
   {
-    "id": "cat-002",
+    "id": "022f7e58-ca17-7426-a2bd-7e7d33171f4a",
     "name": "Prototypes",
     "slug": "prototypes",
     "description": "Rapid prototyping for product development and concept validation",
@@ -16,7 +16,7 @@
     "sortOrder": 2
   },
   {
-    "id": "cat-003",
+    "id": "e70dd391-86ca-2ebf-2575-42987db7603a",
     "name": "Home & Office",
     "slug": "home-office",
     "description": "Organizers, holders, and accessories for your space",
@@ -24,7 +24,7 @@
     "sortOrder": 3
   },
   {
-    "id": "cat-004",
+    "id": "5455d60b-4bb8-7e5f-0d04-b4c2aae36390",
     "name": "Educational",
     "slug": "educational",
     "description": "Learning tools, models, and demonstration pieces",
@@ -32,7 +32,7 @@
     "sortOrder": 4
   },
   {
-    "id": "cat-005",
+    "id": "2de8e650-81d1-7d09-f193-3b86c7ecaf43",
     "name": "Custom Projects",
     "slug": "custom-projects",
     "description": "Unique designs and one-of-a-kind creations",

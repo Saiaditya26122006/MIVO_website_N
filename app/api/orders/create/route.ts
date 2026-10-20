@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getProductById } from "@/services/products.service";
 import type { CreateOrderRequest, CreateOrderResponse } from "@/lib/data/cart-types";
 
-/**
- * POST /api/orders/create
- *
- * Server-side order creation with:
- * - Price validation against trusted catalogue (never trust client prices)
- * - Atomic order + line-item creation via database transaction (RPC)
- * - Idempotency key to prevent duplicate orders from retries/double-clicks
- * - Ownership check (order belongs to authenticated user)
- */
 export async function POST(request: NextRequest): Promise<NextResponse<CreateOrderResponse>> {
   try {
     const supabase = await createClient();
@@ -34,6 +24,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { success: false, error: "Order must contain at least one item" },
+        { status: 400 }
+      );
+    }
+
+    if (!contactDetails) {
+      return NextResponse.json(
+        { success: false, error: "Contact details are required" },
         { status: 400 }
       );
     }
@@ -70,7 +67,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       );
     }
 
-    // Validate and price each item from trusted catalogue
+    // Validate and price each item against the trusted catalogue.
+    // Uses the server Supabase client directly — the previous getProductById
+    // import used a browser client (createBrowserClient) which throws in
+    // server-side API routes where no browser context exists.
     const validatedItems = [];
     let subtotalPaise = 0;
 
@@ -89,16 +89,34 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
-      const product = await getProductById(item.productId);
+      const { data: product, error: productError } = await supabase
+        .from("products")
+        .select(`
+          id, name, status,
+          product_variants(id, sku, size_name, material, color_options, price_paise)
+        `)
+        .eq("id", item.productId)
+        .eq("status", "published")
+        .single();
 
-      if (!product || product.status !== "published") {
+      if (productError || !product) {
+        console.error("[Order Creation] Product lookup failed:", item.productId, productError?.message);
         return NextResponse.json(
           { success: false, error: `Product not available: ${item.productId}` },
           { status: 400 }
         );
       }
 
-      const variant = product.variants.find((v) => v.id === item.variantId);
+      const variants = (product as Record<string, unknown>).product_variants as Array<{
+        id: string;
+        sku: string;
+        size_name: string;
+        material: string;
+        color_options: string[];
+        price_paise: number;
+      }>;
+
+      const variant = variants?.find((v) => v.id === item.variantId);
 
       if (!variant) {
         return NextResponse.json(
@@ -107,14 +125,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
-      if (variant.colorOptions.length > 0 && !variant.colorOptions.includes(item.selectedColor)) {
+      const colorOptions = variant.color_options || [];
+      if (colorOptions.length > 0 && !colorOptions.includes(item.selectedColor)) {
         return NextResponse.json(
           { success: false, error: `Invalid color option: ${item.selectedColor}` },
           { status: 400 }
         );
       }
 
-      const unitPricePaise = variant.pricePaise;
+      const unitPricePaise = variant.price_paise;
       const lineTotalPaise = unitPricePaise * item.quantity;
 
       validatedItems.push({
@@ -122,7 +141,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         product_name: product.name,
         variant_id: variant.id,
         variant_sku: variant.sku,
-        size_name: variant.sizeName,
+        size_name: variant.size_name,
         material: variant.material,
         selected_color: item.selectedColor,
         quantity: item.quantity,
@@ -136,11 +155,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
     const shippingPaise = 10000; // ₹100 flat rate
     const totalPaise = subtotalPaise + shippingPaise;
 
-    // Generate or use provided idempotency key
     const effectiveIdempotencyKey =
       idempotencyKey || `auto_${user.id}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-    // Try atomic RPC-based creation first
     const { data: rpcResult, error: rpcError } = await supabase.rpc(
       "create_order_atomic",
       {
@@ -159,12 +176,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         p_shipping_paise: shippingPaise,
         p_total_paise: totalPaise,
         p_special_instructions: contactDetails.specialInstructions || null,
-        p_line_items: JSON.stringify(validatedItems),
+        p_line_items: validatedItems,
       }
     );
 
     if (rpcError) {
-      console.error("[Order Creation] RPC error:", rpcError);
+      console.error("[Order Creation] RPC error:", rpcError.code, rpcError.message);
 
       if (rpcError.code === "42883" || rpcError.message?.includes("does not exist")) {
         return NextResponse.json(
@@ -181,7 +198,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       }
 
       return NextResponse.json(
-        { success: false, error: "Failed to create order" },
+        { success: false, error: `Failed to create order: ${rpcError.message}` },
         { status: 500 }
       );
     }
@@ -200,9 +217,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       orderNumber: result.order_number,
     });
   } catch (error) {
-    console.error("[Order Creation] Unexpected error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[Order Creation] Unexpected error:", message);
+    if (error instanceof Error && error.stack) {
+      console.error("[Order Creation] Stack:", error.stack);
+    }
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: `Order creation failed: ${message}` },
       { status: 500 }
     );
   }

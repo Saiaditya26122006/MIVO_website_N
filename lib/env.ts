@@ -20,15 +20,18 @@ function getEnvVar(key: string, required: boolean = true): string {
 }
 
 // Public environment variables (safe for browser)
+// IMPORTANT: NEXT_PUBLIC_ vars must use the literal process.env.NEXT_PUBLIC_X
+// form. Next.js inlines these at build time — dynamic lookups like
+// process.env[key] are NOT substituted and will be undefined in the browser.
 export const env = {
   // Application
-  siteUrl: getEnvVar("NEXT_PUBLIC_SITE_URL", true),
-  nodeEnv: getEnvVar("NODE_ENV", false) || "development",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  nodeEnv: process.env.NODE_ENV || "development",
 
   // Supabase (public keys)
   supabase: {
-    url: getEnvVar("NEXT_PUBLIC_SUPABASE_URL", false),
-    anonKey: getEnvVar("NEXT_PUBLIC_SUPABASE_ANON_KEY", false),
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
   },
 } as const;
 

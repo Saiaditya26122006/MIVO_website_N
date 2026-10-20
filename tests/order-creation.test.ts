@@ -2,7 +2,7 @@
  * Order Creation API Tests
  *
  * Tests the POST /api/orders/create route handler by mocking
- * Supabase, product service, and Next.js server primitives. Covers:
+ * Supabase and Next.js server primitives. Covers:
  *   - Successful atomic order creation via RPC
  *   - Missing RPC function (503 Service Unavailable, no fallback)
  *   - Generic RPC failure (500)
@@ -18,6 +18,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockRpc = vi.fn();
 const mockGetUser = vi.fn();
+const mockSingle = vi.fn();
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
@@ -30,33 +31,37 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue({
     auth: { getUser: () => mockGetUser() },
     rpc: (...args: unknown[]) => mockRpc(...args),
-  }),
-}));
-
-vi.mock("@/services/products.service", () => ({
-  getProductById: vi.fn().mockResolvedValue({
-    id: "prod-001",
-    name: "Modular Desk Organizer",
-    slug: "desk-organizer-modular",
-    status: "published",
-    variants: [
-      {
-        id: "var-001-1",
-        sku: "DESK-ORG-SM-PLA",
-        sizeName: "Small",
-        material: "PLA",
-        pricePaise: 45000,
-        colorOptions: ["Black", "White", "Gray", "Blue"],
-      },
-    ],
-    images: [{ url: "/img.svg", isPrimary: true }],
-    categoryId: "cat-001",
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          eq: () => ({
+            single: () => mockSingle(),
+          }),
+        }),
+      }),
+    }),
   }),
 }));
 
 // --- Helpers ---------------------------------------------------------
 
 const FAKE_USER = { id: "user-uuid-123" };
+
+const MOCK_PRODUCT = {
+  id: "prod-001",
+  name: "Modular Desk Organizer",
+  status: "published",
+  product_variants: [
+    {
+      id: "var-001-1",
+      sku: "DESK-ORG-SM-PLA",
+      size_name: "Small",
+      material: "PLA",
+      price_paise: 45000,
+      color_options: ["Black", "White", "Gray", "Blue"],
+    },
+  ],
+};
 
 function validBody() {
   return {
@@ -93,6 +98,7 @@ import { POST } from "@/app/api/orders/create/route";
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetUser.mockResolvedValue({ data: { user: FAKE_USER }, error: null });
+  mockSingle.mockResolvedValue({ data: MOCK_PRODUCT, error: null });
 });
 
 describe("POST /api/orders/create", () => {
@@ -180,7 +186,7 @@ describe("POST /api/orders/create", () => {
 
       expect(res.status).toBe(500);
       expect(json.success).toBe(false);
-      expect(json.error).toBe("Failed to create order");
+      expect(json.error).toContain("internal error");
     });
 
     it("returns 500 when RPC returns null data without error", async () => {
@@ -290,6 +296,16 @@ describe("POST /api/orders/create", () => {
 
       expect(res.status).toBe(400);
       expect(json.validationErrors).toBeDefined();
+    });
+
+    it("returns 400 when product is not found", async () => {
+      mockSingle.mockResolvedValue({ data: null, error: { code: "PGRST116", message: "not found" } });
+
+      const res = await POST(makeRequest() as never);
+      const json = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(json.error).toContain("Product not available");
     });
   });
 

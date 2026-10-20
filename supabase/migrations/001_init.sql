@@ -2,9 +2,8 @@
 -- Migration 001: Extensions and Base Functions
 -- Created: 2026-10-19
 
--- Enable required PostgreSQL extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Extensions uuid-ossp and pgcrypto are pre-installed in the extensions schema
+-- on Supabase hosted projects. Use gen_random_uuid() instead of uuid_generate_v4().
 
 -- Create updated_at trigger function
 -- This function automatically updates the updated_at timestamp on row updates
