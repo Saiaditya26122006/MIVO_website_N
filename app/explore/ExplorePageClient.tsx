@@ -68,90 +68,140 @@ export function ExplorePageClient({ initialProducts, initialCategories }: Explor
       <Navigation />
 
       <main className="flex-1 pt-20">
-        {/* Header */}
-        <section className="py-12 bg-cream border-b border-ink/10">
-          <div className="max-w-7xl mx-auto px-6">
-            <h1 className="font-handwritten text-5xl md:text-7xl font-bold text-ink mb-4">
-              Ready-to-Order Models
-              <span className="relative inline-block ml-2">
-                <span className="relative z-10">.</span>
-                <span className="absolute inset-0 bg-yellow opacity-60 -rotate-3 rounded" />
-              </span>
-            </h1>
+        {/* Modern Header with Gradient */}
+        <section className="relative py-16 md:py-20 bg-gradient-to-br from-cream via-cream to-lime/5 overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-lime/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-yellow/5 rounded-full blur-3xl" />
 
-            <div className="flex items-center gap-2 text-ink/70">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-lime"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
+          <div className="max-w-7xl mx-auto px-6 relative">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm text-ink/50 mb-4">
+              <span>Home</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-              <span className="font-medium">{filteredProducts.length} products available</span>
+              <span className="text-ink font-medium">Explore Models</span>
             </div>
-          </div>
-        </section>
 
-        {/* Filters */}
-        <section className="py-8 bg-white border-b border-ink/10">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Search */}
-              <div className="md:col-span-2">
-                <Input
-                  type="search"
-                  placeholder="Search by name, category, or tag..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              {/* Sort */}
+            <div className="grid md:grid-cols-2 gap-8 items-center mb-8">
+              {/* Left: Title */}
               <div>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-ink/20 rounded-lg bg-white text-ink focus:border-lime focus:ring-2 focus:ring-lime/20 focus:outline-none transition-all"
-                >
-                  <option value="name-asc">Name (A-Z)</option>
-                  <option value="name-desc">Name (Z-A)</option>
-                  <option value="price-asc">Price (Low to High)</option>
-                  <option value="price-desc">Price (High to Low)</option>
-                </select>
+                <h1 className="font-handwritten text-5xl md:text-7xl font-bold text-ink mb-3 leading-tight">
+                  Ready-to-Order Models
+                  <span className="relative inline-block ml-2">
+                    <span className="relative z-10">.</span>
+                    <span className="absolute inset-0 bg-yellow opacity-60 -rotate-3 rounded" />
+                  </span>
+                </h1>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur rounded-full border border-ink/10">
+                    <div className="w-2 h-2 bg-lime rounded-full animate-pulse" />
+                    <span className="font-semibold text-ink">{filteredProducts.length}</span>
+                    <span className="text-ink/60">models available</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Quick Stats */}
+              <div className="hidden md:grid grid-cols-3 gap-4">
+                <div className="bg-white/60 backdrop-blur border border-ink/10 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-ink mb-1">24-48h</div>
+                  <div className="text-xs text-ink/60 uppercase tracking-wide">Turnaround</div>
+                </div>
+                <div className="bg-white/60 backdrop-blur border border-ink/10 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-ink mb-1">5+</div>
+                  <div className="text-xs text-ink/60 uppercase tracking-wide">Materials</div>
+                </div>
+                <div className="bg-white/60 backdrop-blur border border-ink/10 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-ink mb-1">100%</div>
+                  <div className="text-xs text-ink/60 uppercase tracking-wide">Custom</div>
+                </div>
               </div>
             </div>
 
-            {/* Category Pills */}
-            <div className="flex flex-wrap gap-3 mt-6">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-6 py-2 rounded-full font-medium transition-all ${
-                  selectedCategory === null
-                    ? "bg-lime text-ink shadow-md"
-                    : "bg-white text-ink/70 border-2 border-ink/10 hover:border-lime/50 hover:bg-lime/5"
-                }`}
-              >
-                All Products
-              </button>
+            {/* Search & Filters Card */}
+            <div className="bg-white/80 backdrop-blur border-2 border-ink/10 rounded-2xl p-6 shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {/* Search with Icon */}
+                <div className="md:col-span-2 relative">
+                  <svg
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/40"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <Input
+                    type="search"
+                    placeholder="Search models, categories, or tags..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 bg-cream/50 border-ink/20"
+                  />
+                </div>
 
-              {initialCategories.map((category) => (
+                {/* Sort with Icon */}
+                <div className="relative">
+                  <svg
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/40 pointer-events-none"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                  </svg>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-ink/20 rounded-lg bg-cream/50 text-ink font-medium focus:border-lime focus:ring-2 focus:ring-lime/20 focus:outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price-asc">Price (Low to High)</option>
+                    <option value="price-desc">Price (High to Low)</option>
+                  </select>
+                  <svg
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/40 pointer-events-none"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-semibold text-ink/50 uppercase tracking-wide self-center mr-2">Filter:</span>
                 <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-2 rounded-full font-medium transition-all ${
-                    selectedCategory === category.id
-                      ? "bg-lime text-ink shadow-md"
-                      : "bg-white text-ink/70 border-2 border-ink/10 hover:border-lime/50 hover:bg-lime/5"
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                    selectedCategory === null
+                      ? "bg-lime text-ink shadow-md scale-105"
+                      : "bg-ink/5 text-ink/70 hover:bg-ink/10 hover:scale-105"
                   }`}
                 >
-                  {category.name}
+                  All Products
                 </button>
-              ))}
+
+                {initialCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                      selectedCategory === category.id
+                        ? "bg-lime text-ink shadow-md scale-105"
+                        : "bg-ink/5 text-ink/70 hover:bg-ink/10 hover:scale-105"
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -183,7 +233,7 @@ export function ExplorePageClient({ initialProducts, initialCategories }: Explor
                 actionHref="/explore"
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

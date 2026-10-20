@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { LearnMoreButton } from "@/components/ui/LearnMoreButton";
 
 interface Service {
   title: string;
@@ -117,18 +118,7 @@ export function ServiceCards() {
                   {service.description}
                 </p>
 
-                <div className="flex items-center gap-2 text-lime font-medium">
-                  <span>Learn More</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
+                <LearnMoreButton />
               </div>
             </Link>
           ))}
