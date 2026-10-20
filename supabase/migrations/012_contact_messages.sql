@@ -75,46 +75,22 @@ CREATE POLICY "Admins can view all contact messages"
   ON contact_messages
   FOR SELECT
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM admin_users
-      WHERE user_id = auth.uid()
-      AND is_active = true
-    )
-  );
+  USING (public.is_admin());
 
 -- Admin can update messages (status, notes, etc.)
 CREATE POLICY "Admins can update contact messages"
   ON contact_messages
   FOR UPDATE
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM admin_users
-      WHERE user_id = auth.uid()
-      AND is_active = true
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM admin_users
-      WHERE user_id = auth.uid()
-      AND is_active = true
-    )
-  );
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
 
 -- Admin can delete messages (for spam/cleanup)
 CREATE POLICY "Admins can delete contact messages"
   ON contact_messages
   FOR DELETE
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM admin_users
-      WHERE user_id = auth.uid()
-      AND is_active = true
-    )
-  );
+  USING (public.is_admin());
 
 -- Grant permissions
 GRANT SELECT, INSERT ON contact_messages TO anon;
