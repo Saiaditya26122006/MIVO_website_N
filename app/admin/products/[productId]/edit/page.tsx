@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { updateProduct, uploadProductImage, deleteProductImage } from "../../actions";
 import type { ProductFormData, ProductVariantFormData, ProductImageFormData } from "../../actions";
+import { VariantEditor } from "@/components/admin/VariantEditor";
 
 interface Category {
   id: string;
@@ -193,44 +194,6 @@ export default function EditProductPage() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
-  }
-
-  function calculatePrice(material: string, weightGrams: number | null): number {
-    if (!weightGrams || weightGrams <= 0) return 0;
-    const rate = materialRates[material] || 0;
-    return Math.round(weightGrams * rate);
-  }
-
-  function addVariant() {
-    setVariants([
-      ...variants,
-      {
-        sku: "",
-        sizeName: "",
-        lengthMm: 0,
-        widthMm: 0,
-        heightMm: 0,
-        material: "PLA",
-        colorOptions: ["Natural"],
-        pricePaise: 0,
-        productionWeightGrams: null,
-        productionTimeHours: 24,
-        isActive: true,
-        isDefault: false,
-      },
-    ]);
-  }
-
-  function removeVariant(index: number) {
-    if (variants.length === 1) {
-      setError("At least one variant is required");
-      return;
-    }
-    const newVariants = variants.filter((_, i) => i !== index);
-    if (!newVariants.some((v) => v.isDefault)) {
-      newVariants[0].isDefault = true;
-    }
-    setVariants(newVariants);
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -612,201 +575,11 @@ export default function EditProductPage() {
               </div>
 
               {/* Variants */}
-              <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-semibold text-xl text-ink">Variants</h2>
-                  <Button variant="secondary" size="sm" onClick={addVariant}>
-                    + Add Variant
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  {variants.map((variant, index) => (
-                    <div key={index} className="border-2 border-ink/10 rounded-xl p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-ink">Variant {index + 1}</h3>
-                        {variants.length > 1 && (
-                          <button
-                            onClick={() => removeVariant(index)}
-                            className="text-sm text-red-600 hover:text-red-700"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">SKU *</label>
-                          <input
-                            type="text"
-                            value={variant.sku}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].sku = e.target.value;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                            placeholder="MDO-S-PLA"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Size Name *</label>
-                          <input
-                            type="text"
-                            value={variant.sizeName}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].sizeName = e.target.value;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                            placeholder="Small"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Length (mm) *</label>
-                          <input
-                            type="number"
-                            value={variant.lengthMm}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].lengthMm = parseInt(e.target.value) || 0;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Width (mm) *</label>
-                          <input
-                            type="number"
-                            value={variant.widthMm}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].widthMm = parseInt(e.target.value) || 0;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Height (mm) *</label>
-                          <input
-                            type="number"
-                            value={variant.heightMm}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].heightMm = parseInt(e.target.value) || 0;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Material *</label>
-                          <select
-                            value={variant.material}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].material = e.target.value;
-                              if (newVariants[index].productionWeightGrams) {
-                                newVariants[index].pricePaise = calculatePrice(
-                                  e.target.value,
-                                  newVariants[index].productionWeightGrams
-                                );
-                              }
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                          >
-                            {Object.keys(materialRates).map(mat => (
-                              <option key={mat} value={mat}>{mat}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">
-                            Production Weight (g) *
-                          </label>
-                          <input
-                            type="number"
-                            value={variant.productionWeightGrams || ""}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              const weight = parseFloat(e.target.value) || null;
-                              newVariants[index].productionWeightGrams = weight;
-                              if (weight) {
-                                newVariants[index].pricePaise = calculatePrice(
-                                  newVariants[index].material,
-                                  weight
-                                );
-                              }
-                              setVariants(newVariants);
-                            }}
-                            step="0.1"
-                            min="0"
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                            placeholder="e.g., 45.5"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">
-                            Price (₹) - Auto-calculated
-                          </label>
-                          <div className="w-full px-3 py-2 text-sm border-2 border-lime/50 rounded-lg bg-lime/10">
-                            <span className="font-semibold text-ink">
-                              ₹{(variant.pricePaise / 100).toFixed(2)}
-                            </span>
-                            {variant.productionWeightGrams && (
-                              <span className="text-xs text-ink/60 ml-2">
-                                ({variant.productionWeightGrams}g × ₹{(materialRates[variant.material] / 100).toFixed(2)}/g)
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Production Time (hrs)</label>
-                          <input
-                            type="number"
-                            value={variant.productionTimeHours || ""}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].productionTimeHours = parseInt(e.target.value) || null;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-3 flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={variant.isDefault}
-                          onChange={(e) => {
-                            const newVariants = variants.map((v, i) => ({
-                              ...v,
-                              isDefault: i === index ? e.target.checked : false,
-                            }));
-                            setVariants(newVariants);
-                          }}
-                          className="w-4 h-4 border-2 border-ink/20 rounded"
-                        />
-                        <label className="text-sm text-ink/70">Default variant</label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <VariantEditor
+                variants={variants}
+                materialRates={materialRates}
+                onChange={setVariants}
+              />
 
               {/* Actions */}
               <div className="flex gap-4">
