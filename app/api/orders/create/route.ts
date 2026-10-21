@@ -93,7 +93,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         .from("products")
         .select(`
           id, name, status,
-          product_variants(id, sku, size_name, material, color_options, price_paise)
+          product_variants(
+            id, sku, size_name, material, color_options, price_paise,
+            production_weight_grams, length_mm, width_mm, height_mm, is_active
+          )
         `)
         .eq("id", item.productId)
         .eq("status", "published")
@@ -114,6 +117,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         material: string;
         color_options: string[];
         price_paise: number;
+        production_weight_grams: number | null;
+        length_mm: number;
+        width_mm: number;
+        height_mm: number;
+        is_active: boolean;
       }>;
 
       const variant = variants?.find((v) => v.id === item.variantId);
@@ -125,12 +133,46 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         );
       }
 
+      // Check if variant is active
+      if (variant.is_active === false) {
+        return NextResponse.json(
+          { success: false, error: `Variant ${variant.sku} is not available` },
+          { status: 400 }
+        );
+      }
+
       const colorOptions = variant.color_options || [];
       if (colorOptions.length > 0 && !colorOptions.includes(item.selectedColor)) {
         return NextResponse.json(
           { success: false, error: `Invalid color option: ${item.selectedColor}` },
           { status: 400 }
         );
+      }
+
+      // Get material rate for pricing snapshot
+      let materialRatePaisePerGram: number | null = null;
+      if (variant.production_weight_grams) {
+        const { data: materialRate } = await supabase
+          .from("material_pricing_settings")
+          .select("rate_paise_per_gram")
+          .eq("material", variant.material)
+          .eq("is_active", true)
+          .single();
+
+        if (materialRate) {
+          materialRatePaisePerGram = materialRate.rate_paise_per_gram;
+
+          // Recalculate price server-side to prevent tampering
+          const calculatedPrice = Math.round(variant.production_weight_grams * materialRate.rate_paise_per_gram);
+
+          // Verify the variant's stored price matches calculation (allow 1 paise tolerance for rounding)
+          if (Math.abs(variant.price_paise - calculatedPrice) > 1) {
+            console.warn(
+              `[Order Creation] Price mismatch for variant ${variant.sku}: ` +
+              `stored=${variant.price_paise}, calculated=${calculatedPrice}`
+            );
+          }
+        }
       }
 
       const unitPricePaise = variant.price_paise;
@@ -147,6 +189,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         quantity: item.quantity,
         unit_price_paise: unitPricePaise,
         line_total_paise: lineTotalPaise,
+        production_weight_grams: variant.production_weight_grams,
+        material_rate_paise_per_gram: materialRatePaisePerGram,
+        length_mm: variant.length_mm,
+        width_mm: variant.width_mm,
+        height_mm: variant.height_mm,
       });
 
       subtotalPaise += lineTotalPaise;

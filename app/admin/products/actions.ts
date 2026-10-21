@@ -26,7 +26,9 @@ export interface ProductVariantFormData {
   material: string;
   colorOptions: string[];
   pricePaise: number;
+  productionWeightGrams?: number | null; // Production weight for automatic pricing
   productionTimeHours: number | null;
+  isActive?: boolean;
   isDefault: boolean;
 }
 
@@ -165,7 +167,9 @@ export async function createProduct(
       material: v.material,
       color_options: v.colorOptions,
       price_paise: v.pricePaise,
+      production_weight_grams: v.productionWeightGrams || null,
       production_time_hours: v.productionTimeHours,
+      is_active: v.isActive !== undefined ? v.isActive : true,
       is_default: v.isDefault,
     }));
 
@@ -335,7 +339,9 @@ export async function updateProduct(
             material: variant.material,
             color_options: variant.colorOptions,
             price_paise: variant.pricePaise,
+            production_weight_grams: variant.productionWeightGrams || null,
             production_time_hours: variant.productionTimeHours,
+            is_active: variant.isActive !== undefined ? variant.isActive : true,
             is_default: variant.isDefault,
           })
           .eq("id", variant.id);
@@ -351,7 +357,9 @@ export async function updateProduct(
           material: variant.material,
           color_options: variant.colorOptions,
           price_paise: variant.pricePaise,
+          production_weight_grams: variant.productionWeightGrams || null,
           production_time_hours: variant.productionTimeHours,
+          is_active: variant.isActive !== undefined ? variant.isActive : true,
           is_default: variant.isDefault,
         });
       }

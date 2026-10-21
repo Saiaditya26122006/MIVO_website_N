@@ -33,9 +33,20 @@ export interface ProductVariant {
   };
   material: string;
   colorOptions: string[];
-  pricePaise: number; // Fixed price in paise (INR × 100)
+  pricePaise: number; // Price in paise (INR × 100) - calculated from weight × material rate
+  productionWeightGrams?: number | null; // Production weight for calculating price (optional for backward compatibility)
   productionTimeHours: number | null;
+  isActive?: boolean; // Variant availability
   isDefault: boolean;
+}
+
+export interface MaterialPricingSettings {
+  id: string;
+  material: string;
+  ratePaisePerGram: number; // Rate in paise per gram
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Product {

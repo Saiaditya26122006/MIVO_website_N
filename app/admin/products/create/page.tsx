@@ -49,10 +49,18 @@ export default function CreateProductPage() {
       material: "PLA",
       colorOptions: ["Natural"],
       pricePaise: 0,
+      productionWeightGrams: null,
       productionTimeHours: 24,
+      isActive: true,
       isDefault: true,
     },
   ]);
+
+  const [materialRates, setMaterialRates] = useState<Record<string, number>>({
+    PLA: 500, // ₹5/g = 500 paise/g
+    PETG: 600,
+    TPU: 800,
+  });
 
   const [images, setImages] = useState<ProductImageFormData[]>([]);
 
@@ -90,6 +98,20 @@ export default function CreateProductPage() {
         setProduct((p) => ({ ...p, categoryId: cats[0].id }));
       }
 
+      // Load material rates
+      const { data: rates } = await supabase
+        .from("material_pricing_settings")
+        .select("material, rate_paise_per_gram")
+        .eq("is_active", true);
+
+      if (rates && rates.length > 0) {
+        const ratesMap: Record<string, number> = {};
+        rates.forEach((r: { material: string; rate_paise_per_gram: number }) => {
+          ratesMap[r.material] = r.rate_paise_per_gram;
+        });
+        setMaterialRates(ratesMap);
+      }
+
       setLoading(false);
     }
 
@@ -115,10 +137,18 @@ export default function CreateProductPage() {
         material: "PLA",
         colorOptions: ["Natural"],
         pricePaise: 0,
+        productionWeightGrams: null,
         productionTimeHours: 24,
+        isActive: true,
         isDefault: false,
       },
     ]);
+  }
+
+  function calculatePrice(material: string, weightGrams: number | null): number {
+    if (!weightGrams || weightGrams <= 0) return 0;
+    const rate = materialRates[material] || 0;
+    return Math.round(weightGrams * rate);
   }
 
   function removeVariant(index: number) {
@@ -460,32 +490,69 @@ export default function CreateProductPage() {
 
                         <div>
                           <label className="block text-xs font-medium text-ink/60 mb-1">Material *</label>
-                          <input
-                            type="text"
+                          <select
                             value={variant.material}
                             onChange={(e) => {
                               const newVariants = [...variants];
                               newVariants[index].material = e.target.value;
+                              // Auto-calculate price if weight is set
+                              if (newVariants[index].productionWeightGrams) {
+                                newVariants[index].pricePaise = calculatePrice(
+                                  e.target.value,
+                                  newVariants[index].productionWeightGrams
+                                );
+                              }
                               setVariants(newVariants);
                             }}
                             className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                            placeholder="PLA"
+                          >
+                            {Object.keys(materialRates).map(mat => (
+                              <option key={mat} value={mat}>{mat}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-ink/60 mb-1">
+                            Production Weight (g) *
+                          </label>
+                          <input
+                            type="number"
+                            value={variant.productionWeightGrams || ""}
+                            onChange={(e) => {
+                              const newVariants = [...variants];
+                              const weight = parseFloat(e.target.value) || null;
+                              newVariants[index].productionWeightGrams = weight;
+                              // Auto-calculate price
+                              if (weight) {
+                                newVariants[index].pricePaise = calculatePrice(
+                                  newVariants[index].material,
+                                  weight
+                                );
+                              }
+                              setVariants(newVariants);
+                            }}
+                            step="0.1"
+                            min="0"
+                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
+                            placeholder="e.g., 45.5"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-medium text-ink/60 mb-1">Price (₹) *</label>
-                          <input
-                            type="number"
-                            value={variant.pricePaise / 100}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].pricePaise = Math.round((parseFloat(e.target.value) || 0) * 100);
-                              setVariants(newVariants);
-                            }}
-                            step="0.01"
-                            className="w-full px-3 py-2 text-sm border-2 border-ink/20 rounded-lg focus:border-lime focus:outline-none"
-                          />
+                          <label className="block text-xs font-medium text-ink/60 mb-1">
+                            Price (₹) - Auto-calculated
+                          </label>
+                          <div className="w-full px-3 py-2 text-sm border-2 border-lime/50 rounded-lg bg-lime/10">
+                            <span className="font-semibold text-ink">
+                              ₹{(variant.pricePaise / 100).toFixed(2)}
+                            </span>
+                            {variant.productionWeightGrams && (
+                              <span className="text-xs text-ink/60 ml-2">
+                                ({variant.productionWeightGrams}g × ₹{(materialRates[variant.material] / 100).toFixed(2)}/g)
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <div>

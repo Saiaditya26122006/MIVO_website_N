@@ -44,6 +44,12 @@ export interface OrderLineItem {
   quantity: number;
   unitPricePaise: number; // Server-validated price at order time
   lineTotalPaise: number; // quantity × unitPricePaise
+  // Weight-based pricing snapshots (added in M8)
+  productionWeightGrams?: number | null;
+  materialRatePaisePerGram?: number | null;
+  lengthMm?: number | null;
+  widthMm?: number | null;
+  heightMm?: number | null;
 }
 
 export type OrderStatus =

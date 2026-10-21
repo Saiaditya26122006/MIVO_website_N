@@ -222,8 +222,16 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                               {formatPrice(variant.pricePaise)}
                             </div>
                           </div>
-                          <div className="text-sm text-ink/60">
-                            {variant.dimensions.lengthMm} × {variant.dimensions.widthMm} × {variant.dimensions.heightMm} mm
+                          <div className="text-sm text-ink/60 space-y-1">
+                            <div>
+                              <span className="font-medium">Dimensions:</span>{" "}
+                              {variant.dimensions.lengthMm} × {variant.dimensions.widthMm} × {variant.dimensions.heightMm} mm (L × W × H)
+                            </div>
+                            {variant.productionWeightGrams && (
+                              <div>
+                                <span className="font-medium">Weight:</span> {variant.productionWeightGrams}g
+                              </div>
+                            )}
                           </div>
                         </button>
                       ))}

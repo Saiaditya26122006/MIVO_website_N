@@ -37,7 +37,11 @@ function mapVariantFromDB(dbRow: Record<string, unknown>): ProductVariant {
     material: dbRow.material as string,
     colorOptions: (dbRow.color_options as string[]) || [],
     pricePaise: Number(dbRow.price_paise),
+    productionWeightGrams: dbRow.production_weight_grams !== null && dbRow.production_weight_grams !== undefined
+      ? Number(dbRow.production_weight_grams)
+      : null,
     productionTimeHours: (dbRow.production_time_hours as number | null) || null,
+    isActive: (dbRow.is_active as boolean) !== false,
     isDefault: (dbRow.is_default as boolean) || false,
   };
 }
