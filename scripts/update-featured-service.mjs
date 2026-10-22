@@ -1,8 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from './supabase-client.mjs';
 
-const supabaseUrl = 'https://ntrbvoxdvpywadiqgvtt.supabase.co';
-const serviceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50cmJ2b3hkdnB5d2FkaXFndnR0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjQxMTkyOCwiZXhwIjoyMTA3OTg3OTI4fQ.WkCfS-KeUnpiVE1DGMILoKaUS-iIoWj5QgwL3uhflPY';
-const supabase = createClient(supabaseUrl, serviceKey);
+const supabase = createAdminClient();
 
 // Mark 2 additional products as featured by ID using service role key
 const productsToFeature = [
