@@ -27,6 +27,10 @@ interface OrderData {
   subtotalPaise: number;
   shippingPaise: number;
   totalPaise: number;
+  paymentMethod: string | null;
+  paymentId: string | null;
+  paymentStatus: string;
+  paidAt: string | null;
   createdAt: string;
   items: OrderItemData[];
 }
@@ -154,6 +158,10 @@ export default function AdminOrderDetailPage() {
         subtotalPaise: data.subtotal_paise,
         shippingPaise: data.shipping_paise,
         totalPaise: data.total_paise,
+        paymentMethod: data.payment_method,
+        paymentId: data.payment_id,
+        paymentStatus: data.payment_status,
+        paidAt: data.paid_at,
         createdAt: data.created_at,
         items,
       });
@@ -383,6 +391,68 @@ export default function AdminOrderDetailPage() {
                   <span>Total</span>
                   <span>{formatPrice(order.totalPaise)}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Payment Information */}
+            <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
+              <h2 className="font-semibold text-xl text-ink mb-4">Payment Information</h2>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-ink/60">Payment Method</p>
+                  <p className="font-medium text-ink">
+                    {order.paymentMethod === "cod"
+                      ? "Cash on Delivery"
+                      : order.paymentMethod === "razorpay"
+                      ? "Online Payment (Razorpay)"
+                      : order.paymentMethod || "Not Set"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-ink/60">Payment Status</p>
+                  <p
+                    className={`font-medium ${
+                      order.paymentStatus === "completed"
+                        ? "text-green-600"
+                        : order.paymentStatus === "failed"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {order.paymentStatus === "completed"
+                      ? "Paid"
+                      : order.paymentStatus === "failed"
+                      ? "Failed"
+                      : order.paymentStatus === "initiated"
+                      ? "Payment Initiated"
+                      : "Pending"}
+                  </p>
+                </div>
+
+                {order.paymentId && (
+                  <div>
+                    <p className="text-sm text-ink/60">Payment ID</p>
+                    <p className="font-mono text-xs text-ink break-all">{order.paymentId}</p>
+                  </div>
+                )}
+
+                {order.paidAt && (
+                  <div>
+                    <p className="text-sm text-ink/60">Paid At</p>
+                    <p className="font-medium text-ink">{formatDate(order.paidAt)}</p>
+                  </div>
+                )}
+
+                {order.paymentMethod === "cod" && order.paymentStatus === "pending" && (
+                  <div className="mt-4 p-3 bg-yellow/10 border border-yellow/30 rounded-lg">
+                    <p className="text-sm text-ink">
+                      <strong>COD Note:</strong> Payment will be collected in cash on delivery.
+                      Mark as paid manually after confirmation.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

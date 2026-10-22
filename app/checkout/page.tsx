@@ -11,6 +11,52 @@ import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/context/CartContext";
 import { createClient } from "@/lib/supabase/client";
 import type { CheckoutFormData } from "@/lib/data/cart-types";
+import Script from "next/script";
+
+// Razorpay types
+interface RazorpayConstructor {
+  new (options: RazorpayOptions): RazorpayInstance;
+}
+
+declare global {
+  interface Window {
+    Razorpay: RazorpayConstructor;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  handler: (response: RazorpayResponse) => void;
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface RazorpayInstance {
+  open(): void;
+  close(): void;
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+type PaymentMethod = "online" | "cod";
 
 function formatPrice(paise: number): string {
   return `₹${(paise / 100).toFixed(2)}`;
@@ -22,11 +68,14 @@ export default function CheckoutPage() {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [idempotencyKey] = useState(
     () => `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
   );
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("online");
   const orderCompleteRef = useRef(false);
 
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -161,6 +210,7 @@ export default function CheckoutPage() {
     setSubmitting(true);
 
     try {
+      // Step 1: Create MIVO order
       const response = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -185,16 +235,121 @@ export default function CheckoutPage() {
         throw new Error(result.error || "Failed to create order");
       }
 
-      // Mark order complete BEFORE clearing cart so the empty-cart
-      // redirect guard doesn't hijack navigation.
-      orderCompleteRef.current = true;
-      clearCart();
-      router.push(`/account/orders/${result.orderId}`);
+      const orderId = result.orderId;
+
+      // Step 2: Handle payment based on selected method
+      if (paymentMethod === "cod") {
+        // Cash on Delivery - order is created, just navigate to order page
+        orderCompleteRef.current = true;
+        clearCart();
+        router.push(`/account/orders/${orderId}`);
+      } else {
+        // Online payment - initiate Razorpay checkout
+        await initiateOnlinePayment(orderId);
+      }
     } catch (err) {
       console.error("[Checkout] Order creation failed:", err);
       setError(err instanceof Error ? err.message : "Failed to create order. Please try again.");
-    } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function initiateOnlinePayment(orderId: string) {
+    try {
+      setProcessingPayment(true);
+
+      // Create Razorpay order
+      const response = await fetch("/api/payments/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Failed to initiate payment");
+      }
+
+      // Check if Razorpay is loaded
+      if (!razorpayLoaded || !window.Razorpay) {
+        throw new Error("Payment gateway not loaded. Please refresh and try again.");
+      }
+
+      // Open Razorpay checkout
+      const razorpayOptions: RazorpayOptions = {
+        key: result.razorpayKeyId,
+        amount: result.amount,
+        currency: result.currency,
+        name: "MIVO",
+        description: `Order #${result.orderNumber}`,
+        order_id: result.razorpayOrderId,
+        prefill: {
+          name: result.customerName,
+          email: result.customerEmail,
+          contact: result.customerPhone,
+        },
+        theme: {
+          color: "#84cc16", // lime color from theme
+        },
+        handler: async (response: RazorpayResponse) => {
+          await handlePaymentSuccess(orderId, response);
+        },
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+            setProcessingPayment(false);
+            setError("Payment cancelled. You can retry payment from your order page.");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(razorpayOptions);
+      rzp.open();
+    } catch (err) {
+      console.error("[Checkout] Payment initiation failed:", err);
+      setError(err instanceof Error ? err.message : "Failed to initiate payment");
+      setSubmitting(false);
+      setProcessingPayment(false);
+    }
+  }
+
+  async function handlePaymentSuccess(orderId: string, response: RazorpayResponse) {
+    try {
+      setProcessingPayment(true);
+      setError(null);
+
+      // Verify payment on server
+      const verifyResponse = await fetch("/api/payments/razorpay/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          razorpayOrderId: response.razorpay_order_id,
+          razorpayPaymentId: response.razorpay_payment_id,
+          razorpaySignature: response.razorpay_signature,
+        }),
+      });
+
+      const verifyResult = await verifyResponse.json();
+
+      if (!verifyResponse.ok || !verifyResult.success || !verifyResult.verified) {
+        throw new Error(verifyResult.error || "Payment verification failed");
+      }
+
+      // Payment successful
+      orderCompleteRef.current = true;
+      clearCart();
+      router.push(`/account/orders/${orderId}`);
+    } catch (err) {
+      console.error("[Checkout] Payment verification failed:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Payment verification failed. Please contact support if amount was deducted."
+      );
+      setSubmitting(false);
+      setProcessingPayment(false);
     }
   }
 
@@ -216,6 +371,11 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        onLoad={() => setRazorpayLoaded(true)}
+        onError={() => setError("Failed to load payment gateway")}
+      />
       <Navigation />
 
       <main className="flex-1 pt-20 min-h-screen">
@@ -416,6 +576,63 @@ export default function CheckoutPage() {
                       className="w-full px-4 py-3 border-2 border-ink/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-lime focus:border-transparent resize-none"
                     />
                   </div>
+
+                  {/* Payment Method Selection */}
+                  <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
+                    <h2 className="font-semibold text-xl text-ink mb-4">
+                      Payment Method <span className="text-red-500">*</span>
+                    </h2>
+
+                    <div className="space-y-3">
+                      <label
+                        className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                          paymentMethod === "online"
+                            ? "border-lime bg-lime/5"
+                            : "border-ink/20 hover:border-ink/40"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="online"
+                          checked={paymentMethod === "online"}
+                          onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                          disabled={submitting}
+                          className="mt-1 mr-3"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold text-ink">Online Payment (UPI / Cards)</div>
+                          <div className="text-sm text-ink/60 mt-1">
+                            Pay securely using UPI, Credit/Debit Cards, Net Banking, or Wallets via Razorpay
+                          </div>
+                        </div>
+                      </label>
+
+                      <label
+                        className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                          paymentMethod === "cod"
+                            ? "border-lime bg-lime/5"
+                            : "border-ink/20 hover:border-ink/40"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="cod"
+                          checked={paymentMethod === "cod"}
+                          onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                          disabled={submitting}
+                          className="mt-1 mr-3"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold text-ink">Cash on Delivery</div>
+                          <div className="text-sm text-ink/60 mt-1">
+                            Pay with cash when your order is delivered
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right Column - Order Summary */}
@@ -467,14 +684,27 @@ export default function CheckoutPage() {
                       variant="accent"
                       size="lg"
                       className="w-full rounded-full"
-                      disabled={submitting}
+                      disabled={submitting || processingPayment}
                     >
-                      {submitting ? "Placing Order..." : "Place Order"}
+                      {processingPayment
+                        ? "Processing Payment..."
+                        : submitting
+                        ? "Creating Order..."
+                        : paymentMethod === "cod"
+                        ? "Place Order (COD)"
+                        : "Proceed to Payment"}
                     </Button>
 
-                    <p className="text-xs text-center text-ink/60 mt-4">
-                      Payment will be collected separately after order confirmation
-                    </p>
+                    {paymentMethod === "cod" && (
+                      <p className="text-xs text-center text-ink/60 mt-4">
+                        Pay with cash when your order is delivered
+                      </p>
+                    )}
+                    {paymentMethod === "online" && (
+                      <p className="text-xs text-center text-ink/60 mt-4">
+                        You will be redirected to secure payment gateway
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

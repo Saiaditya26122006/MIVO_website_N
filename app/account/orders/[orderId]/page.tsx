@@ -281,17 +281,62 @@ export default function OrderDetailPage() {
             <div className="bg-white border-2 border-ink/10 rounded-2xl p-6">
               <h2 className="font-semibold text-xl text-ink mb-4">Payment</h2>
 
-              <div className="text-ink/80">
+              <div className="text-ink/80 space-y-2">
                 <p>
                   Status:{" "}
-                  <span className={order.paymentStatus === "completed" ? "text-green-600 font-medium" : "text-yellow-600 font-medium"}>
-                    {order.paymentStatus === "completed" ? "Paid" : "Pending"}
+                  <span
+                    className={
+                      order.paymentStatus === "completed"
+                        ? "text-green-600 font-medium"
+                        : order.paymentStatus === "failed"
+                        ? "text-red-600 font-medium"
+                        : "text-yellow-600 font-medium"
+                    }
+                  >
+                    {order.paymentStatus === "completed"
+                      ? "Paid"
+                      : order.paymentStatus === "failed"
+                      ? "Failed"
+                      : order.paymentStatus === "initiated"
+                      ? "Payment Initiated"
+                      : "Pending"}
                   </span>
                 </p>
 
-                {order.paymentStatus === "pending" && (
+                {order.paymentMethod && (
+                  <p>
+                    Method:{" "}
+                    <span className="font-medium">
+                      {order.paymentMethod === "cod"
+                        ? "Cash on Delivery"
+                        : order.paymentMethod === "razorpay"
+                        ? "Online Payment"
+                        : order.paymentMethod}
+                    </span>
+                  </p>
+                )}
+
+                {order.paymentId && (
+                  <p className="text-xs text-ink/50">
+                    Payment ID: {order.paymentId}
+                  </p>
+                )}
+
+                {order.paymentStatus === "pending" && order.paymentMethod === "cod" && (
                   <p className="text-sm text-ink/60 mt-2">
-                    Payment collection will be processed separately. You will receive payment instructions via email.
+                    Payment will be collected in cash when your order is delivered.
+                  </p>
+                )}
+
+                {order.paymentStatus === "pending" && order.paymentMethod !== "cod" && (
+                  <p className="text-sm text-ink/60 mt-2">
+                    Payment is pending. You will receive payment instructions via email.
+                  </p>
+                )}
+
+                {order.paymentStatus === "failed" && (
+                  <p className="text-sm text-red-600 mt-2">
+                    Payment failed. Please contact support or try placing a new order.
                   </p>
                 )}
 
@@ -302,12 +347,31 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Success Message for New Orders */}
-            {order.status === "pending_payment" && (
+            {order.status === "confirmed" && order.paymentStatus === "completed" && (
+              <div className="mt-8 p-6 bg-lime/10 border-2 border-lime/30 rounded-2xl">
+                <h3 className="font-semibold text-lg text-ink mb-2">Payment Successful!</h3>
+                <p className="text-ink/80">
+                  Thank you for your payment. Your order is confirmed and will be processed shortly.
+                  We'll send you tracking information once your order ships.
+                </p>
+              </div>
+            )}
+
+            {order.status === "pending_payment" && order.paymentMethod === "cod" && (
               <div className="mt-8 p-6 bg-lime/10 border-2 border-lime/30 rounded-2xl">
                 <h3 className="font-semibold text-lg text-ink mb-2">Order Placed Successfully!</h3>
                 <p className="text-ink/80">
-                  Thank you for your order. We'll send you an email with payment instructions shortly.
-                  Once payment is received, we'll begin processing your order.
+                  Thank you for your order. Your order will be processed and shipped soon.
+                  Please keep the exact amount ready for cash payment on delivery.
+                </p>
+              </div>
+            )}
+
+            {order.status === "pending_payment" && order.paymentMethod !== "cod" && (
+              <div className="mt-8 p-6 bg-yellow/10 border-2 border-yellow/30 rounded-2xl">
+                <h3 className="font-semibold text-lg text-ink mb-2">Payment Pending</h3>
+                <p className="text-ink/80">
+                  Your order has been placed but payment is pending. Please complete the payment to confirm your order.
                 </p>
               </div>
             )}
