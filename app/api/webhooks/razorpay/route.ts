@@ -288,7 +288,7 @@ async function handlePaymentFailed(
 async function handleOrderPaid(
   supabase: Awaited<ReturnType<typeof createClient>>,
   event: RazorpayWebhookEvent,
-  webhookEventId: string
+  _webhookEventId: string
 ): Promise<NextResponse> {
   const razorpayOrder = event.payload.order?.entity;
 
