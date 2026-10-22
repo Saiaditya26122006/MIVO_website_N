@@ -222,6 +222,7 @@ export default function CheckoutPage() {
             quantity: item.quantity,
           })),
           contactDetails: formData,
+          paymentMethod,
           idempotencyKey,
         }),
       });

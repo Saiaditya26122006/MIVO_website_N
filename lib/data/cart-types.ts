@@ -118,6 +118,8 @@ export interface CheckoutFormData {
   specialInstructions?: string;
 }
 
+export type PaymentMethod = 'online' | 'cod';
+
 // Server-side order creation request
 export interface CreateOrderRequest {
   items: Array<{

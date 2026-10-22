@@ -18,8 +18,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       );
     }
 
-    const body: CreateOrderRequest & { idempotencyKey?: string } = await request.json();
-    const { items, contactDetails, idempotencyKey } = body;
+    const body: CreateOrderRequest & { idempotencyKey?: string; paymentMethod?: string } = await request.json();
+    const { items, contactDetails, paymentMethod, idempotencyKey } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -240,6 +240,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         p_total_paise: totalPaise,
         p_special_instructions: contactDetails.specialInstructions || null,
         p_line_items: validatedItems,
+        p_payment_method: paymentMethod || null,
       }
     );
 
