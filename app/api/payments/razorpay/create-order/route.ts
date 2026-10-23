@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createRazorpayOrder, getPublicKeyId } from "@/lib/payments/razorpay";
 
 interface CreatePaymentOrderRequest {
@@ -65,6 +66,17 @@ export async function POST(
     }
 
     // Verify order is in a state where payment can be initiated
+    // CRITICAL: Prevent COD orders from being processed through Razorpay
+    if (order.payment_method !== "razorpay") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `This order does not support online payment. Payment method: ${order.payment_method || 'not set'}`
+        },
+        { status: 400 }
+      );
+    }
+
     if (order.payment_status === "completed") {
       return NextResponse.json(
         { success: false, error: "Order is already paid" },
@@ -107,7 +119,9 @@ export async function POST(
     });
 
     // Update order with Razorpay order ID and set payment status to initiated
-    const { error: updateError } = await supabase.rpc(
+    // Use admin client for RPC to bypass RLS (user auth and ownership already verified above)
+    const adminClient = createAdminClient();
+    const { error: updateError } = await adminClient.rpc(
       "update_payment_status_atomic",
       {
         p_order_id: orderId,

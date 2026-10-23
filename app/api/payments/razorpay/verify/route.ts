@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyPaymentSignature, fetchPaymentDetails } from "@/lib/payments/razorpay";
 
 interface VerifyPaymentRequest {
@@ -62,6 +63,17 @@ export async function POST(
       );
     }
 
+    // CRITICAL: Prevent COD orders from being verified through Razorpay
+    if (order.payment_method !== "razorpay") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `This order does not support online payment. Payment method: ${order.payment_method || 'not set'}`
+        },
+        { status: 400 }
+      );
+    }
+
     // Verify the order is associated with this Razorpay order ID
     if (order.razorpay_order_id !== razorpayOrderId) {
       console.error(
@@ -95,8 +107,9 @@ export async function POST(
     if (!signatureValid) {
       console.error("[Razorpay Verify] Invalid signature for payment:", razorpayPaymentId);
 
-      // Record failed verification attempt
-      await supabase.rpc("record_payment_transaction", {
+      // Record failed verification attempt (use admin client for RPC)
+      const adminClient = createAdminClient();
+      await adminClient.rpc("record_payment_transaction", {
         p_order_id: orderId,
         p_razorpay_order_id: razorpayOrderId,
         p_razorpay_payment_id: razorpayPaymentId,
@@ -169,8 +182,9 @@ export async function POST(
       paymentDetails.status === "authorized";
 
     if (!isPaymentSuccessful) {
-      // Record failed payment
-      await supabase.rpc("record_payment_transaction", {
+      // Record failed payment (use admin client for RPC)
+      const adminClient = createAdminClient();
+      await adminClient.rpc("record_payment_transaction", {
         p_order_id: orderId,
         p_razorpay_order_id: razorpayOrderId,
         p_razorpay_payment_id: razorpayPaymentId,
@@ -184,8 +198,8 @@ export async function POST(
         p_raw_response: paymentDetails,
       });
 
-      // Update order status to payment_failed
-      await supabase.rpc("update_payment_status_atomic", {
+      // Update order status to payment_failed (use admin client for RPC)
+      await adminClient.rpc("update_payment_status_atomic", {
         p_order_id: orderId,
         p_razorpay_order_id: razorpayOrderId,
         p_razorpay_payment_id: razorpayPaymentId,
@@ -205,7 +219,9 @@ export async function POST(
     }
 
     // Payment is successful - record transaction and update order
-    const { error: transactionError } = await supabase.rpc("record_payment_transaction", {
+    // Use admin client for RPC (user auth and ownership already verified above)
+    const adminClient = createAdminClient();
+    const { error: transactionError } = await adminClient.rpc("record_payment_transaction", {
       p_order_id: orderId,
       p_razorpay_order_id: razorpayOrderId,
       p_razorpay_payment_id: razorpayPaymentId,
@@ -222,8 +238,8 @@ export async function POST(
       console.error("[Razorpay Verify] Failed to record transaction:", transactionError);
     }
 
-    // Update order payment status to completed
-    const { error: updateError } = await supabase.rpc("update_payment_status_atomic", {
+    // Update order payment status to completed (use admin client for RPC)
+    const { error: updateError } = await adminClient.rpc("update_payment_status_atomic", {
       p_order_id: orderId,
       p_razorpay_order_id: razorpayOrderId,
       p_razorpay_payment_id: razorpayPaymentId,
