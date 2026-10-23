@@ -11,39 +11,8 @@ import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/context/CartContext";
 import { createClient } from "@/lib/supabase/client";
 import type { CheckoutFormData } from "@/lib/data/cart-types";
+import type { RazorpayOptions } from "@/types/razorpay";
 import Script from "next/script";
-
-// Razorpay types
-interface RazorpayConstructor {
-  new (options: RazorpayOptions): RazorpayInstance;
-}
-
-declare global {
-  interface Window {
-    Razorpay: RazorpayConstructor;
-  }
-}
-
-interface RazorpayOptions {
-  key: string;
-  amount: number;
-  currency: string;
-  name: string;
-  description: string;
-  order_id: string;
-  prefill?: {
-    name?: string;
-    email?: string;
-    contact?: string;
-  };
-  theme?: {
-    color?: string;
-  };
-  handler: (response: RazorpayResponse) => void;
-  modal?: {
-    ondismiss?: () => void;
-  };
-}
 
 interface RazorpayInstance {
   open(): void;
@@ -56,7 +25,7 @@ interface RazorpayResponse {
   razorpay_signature: string;
 }
 
-type PaymentMethod = "online" | "cod";
+type PaymentMethod = "razorpay" | "cod";
 
 function formatPrice(paise: number): string {
   return `₹${(paise / 100).toFixed(2)}`;
@@ -75,7 +44,7 @@ export default function CheckoutPage() {
   );
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("online");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("razorpay");
   const orderCompleteRef = useRef(false);
 
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -587,7 +556,7 @@ export default function CheckoutPage() {
                     <div className="space-y-3">
                       <label
                         className={`flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                          paymentMethod === "online"
+                          paymentMethod === "razorpay"
                             ? "border-lime bg-lime/5"
                             : "border-ink/20 hover:border-ink/40"
                         }`}
@@ -595,8 +564,8 @@ export default function CheckoutPage() {
                         <input
                           type="radio"
                           name="paymentMethod"
-                          value="online"
-                          checked={paymentMethod === "online"}
+                          value="razorpay"
+                          checked={paymentMethod === "razorpay"}
                           onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
                           disabled={submitting}
                           className="mt-1 mr-3"
@@ -701,7 +670,7 @@ export default function CheckoutPage() {
                         Pay with cash when your order is delivered
                       </p>
                     )}
-                    {paymentMethod === "online" && (
+                    {paymentMethod === "razorpay" && (
                       <p className="text-xs text-center text-ink/60 mt-4">
                         You will be redirected to secure payment gateway
                       </p>

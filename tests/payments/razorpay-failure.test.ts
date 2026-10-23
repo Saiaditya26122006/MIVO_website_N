@@ -674,5 +674,77 @@ describe('Razorpay Payment Failure Handling', () => {
       expect(verifyPaymentSignature).not.toHaveBeenCalled();
       expect(fetchPaymentDetails).not.toHaveBeenCalled();
     });
+
+    it('should reject orders with unsupported payment method (e.g., "online")', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null,
+      });
+
+      const mockInvalidOrder = {
+        id: 'order-invalid-123',
+        customer_id: 'user-123',
+        payment_method: 'online',  // ← Invalid payment method (UI bug or legacy data)
+        payment_status: 'pending',
+        status: 'pending_payment',
+        total_paise: 10000,
+        order_number: 'MVO-INV-001',
+      };
+
+      mockEqEqChain.single.mockResolvedValue({
+        data: mockInvalidOrder,
+        error: null,
+      });
+
+      const { POST } = await import('@/app/api/payments/razorpay/create-order/route');
+      const request = createRequest('http://localhost:3000/api/payments/razorpay/create-order', {
+        orderId: 'order-invalid-123',
+      });
+
+      const response = await POST(request as unknown as NextRequest);
+      const result = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('does not support online payment');
+      expect(result.error).toContain('online');  // Shows the invalid value
+      expect(createRazorpayOrder).not.toHaveBeenCalled();
+    });
+
+    it('should reject orders with null payment method', async () => {
+      mockSupabase.auth.getUser.mockResolvedValue({
+        data: { user: { id: 'user-123' } },
+        error: null,
+      });
+
+      const mockNullPaymentOrder = {
+        id: 'order-null-123',
+        customer_id: 'user-123',
+        payment_method: null,  // ← Not set
+        payment_status: 'pending',
+        status: 'pending_payment',
+        total_paise: 10000,
+        order_number: 'MVO-NULL-001',
+      };
+
+      mockEqEqChain.single.mockResolvedValue({
+        data: mockNullPaymentOrder,
+        error: null,
+      });
+
+      const { POST } = await import('@/app/api/payments/razorpay/create-order/route');
+      const request = createRequest('http://localhost:3000/api/payments/razorpay/create-order', {
+        orderId: 'order-null-123',
+      });
+
+      const response = await POST(request as unknown as NextRequest);
+      const result = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('does not support online payment');
+      expect(result.error).toContain('not set');  // Shows null/undefined
+      expect(createRazorpayOrder).not.toHaveBeenCalled();
+    });
   });
 });
