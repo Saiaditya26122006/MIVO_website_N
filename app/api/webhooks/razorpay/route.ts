@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyWebhookSignature } from "@/lib/payments/razorpay";
 
 interface RazorpayWebhookEvent {
@@ -71,13 +71,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     console.warn("[Razorpay Webhook] Received event:", eventType);
 
-    // Create service role client for database operations
-    const supabase = await createClient();
+    // Create service role client for database operations (webhooks have no user context)
+    const supabase = createAdminClient();
 
     // Generate webhook event ID for deduplication
-    const webhookEventId = `${event.event}_${event.created_at}_${
-      event.payload.payment?.entity?.id || event.payload.order?.entity?.id
-    }`;
+    // Format: {event_type}_{timestamp}_{payment_or_order_id}
+    // Uses payment ID if available (most reliable), otherwise order ID
+    const entityId = event.payload.payment?.entity?.id || event.payload.order?.entity?.id || "unknown";
+    const webhookEventId = `${event.event}_${event.created_at}_${entityId}`;
 
     // Handle different event types
     switch (eventType) {
@@ -97,16 +98,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[Razorpay Webhook] Error processing webhook:", message);
-    // Return 200 to prevent Razorpay from retrying for parsing errors
+
+    // Return appropriate status based on error type
+    // 400 for parsing errors (don't retry), 500 for transient failures (retry)
+    if (error instanceof SyntaxError) {
+      // JSON parsing failed - don't retry
+      return NextResponse.json(
+        { error: "Invalid webhook payload" },
+        { status: 400 }
+      );
+    }
+
+    // Database or network errors - return 500 so Razorpay retries
     return NextResponse.json(
       { error: "Webhook processing failed" },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }
 
 async function handlePaymentCaptured(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createAdminClient>,
   event: RazorpayWebhookEvent,
   webhookEventId: string
 ): Promise<NextResponse> {
@@ -130,6 +142,18 @@ async function handlePaymentCaptured(
     return NextResponse.json(
       { error: "Order not found" },
       { status: 404 }
+    );
+  }
+
+  // CRITICAL: Verify this is not a COD order
+  if (order.payment_method === "cod") {
+    console.error(
+      "[Razorpay Webhook] Rejected Razorpay payment for COD order:",
+      order.order_number
+    );
+    return NextResponse.json(
+      { error: "Payment method mismatch" },
+      { status: 400 }
     );
   }
 
@@ -181,7 +205,12 @@ async function handlePaymentCaptured(
       return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
     }
 
+    // CRITICAL FIX: Transaction recording failed - return 500 so Razorpay retries
     console.error("[Razorpay Webhook] Failed to record transaction:", transactionError);
+    return NextResponse.json(
+      { error: "Failed to record transaction" },
+      { status: 500 }
+    );
   }
 
   // Update order status
@@ -209,7 +238,7 @@ async function handlePaymentCaptured(
 }
 
 async function handlePaymentFailed(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createAdminClient>,
   event: RazorpayWebhookEvent,
   webhookEventId: string
 ): Promise<NextResponse> {
@@ -233,6 +262,18 @@ async function handlePaymentFailed(
     return NextResponse.json(
       { error: "Order not found" },
       { status: 404 }
+    );
+  }
+
+  // CRITICAL: Verify this is not a COD order
+  if (order.payment_method === "cod") {
+    console.error(
+      "[Razorpay Webhook] Rejected Razorpay payment event for COD order:",
+      order.order_number
+    );
+    return NextResponse.json(
+      { error: "Payment method mismatch" },
+      { status: 400 }
     );
   }
 
@@ -260,7 +301,12 @@ async function handlePaymentFailed(
       return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
     }
 
+    // CRITICAL FIX: Transaction recording failed - return 500 so Razorpay retries
     console.error("[Razorpay Webhook] Failed to record transaction:", transactionError);
+    return NextResponse.json(
+      { error: "Failed to record transaction" },
+      { status: 500 }
+    );
   }
 
   // Only update to payment_failed if payment is not already completed
@@ -277,6 +323,8 @@ async function handlePaymentFailed(
 
     if (updateError) {
       console.error("[Razorpay Webhook] Failed to update order status:", updateError);
+      // Non-critical: Failed payment already recorded, status update failure is recoverable
+      // Return 200 because the transaction record is the source of truth
     }
   }
 
@@ -286,7 +334,7 @@ async function handlePaymentFailed(
 }
 
 async function handleOrderPaid(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createAdminClient>,
   event: RazorpayWebhookEvent,
   _webhookEventId: string
 ): Promise<NextResponse> {
@@ -318,6 +366,18 @@ async function handleOrderPaid(
     return NextResponse.json(
       { error: "Order not found" },
       { status: 404 }
+    );
+  }
+
+  // CRITICAL: Verify this is not a COD order
+  if (order.payment_method === "cod") {
+    console.error(
+      "[Razorpay Webhook] Rejected Razorpay order.paid for COD order:",
+      order.order_number
+    );
+    return NextResponse.json(
+      { error: "Payment method mismatch" },
+      { status: 400 }
     );
   }
 
