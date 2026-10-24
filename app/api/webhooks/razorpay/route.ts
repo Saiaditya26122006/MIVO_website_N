@@ -323,8 +323,11 @@ async function handlePaymentFailed(
 
     if (updateError) {
       console.error("[Razorpay Webhook] Failed to update order status:", updateError);
-      // Non-critical: Failed payment already recorded, status update failure is recoverable
-      // Return 200 because the transaction record is the source of truth
+      // CRITICAL FIX: Return 500 so Razorpay retries - order status must reflect failure
+      return NextResponse.json(
+        { error: "Failed to update order status" },
+        { status: 500 }
+      );
     }
   }
 
@@ -336,7 +339,7 @@ async function handlePaymentFailed(
 async function handleOrderPaid(
   supabase: ReturnType<typeof createAdminClient>,
   event: RazorpayWebhookEvent,
-  _webhookEventId: string
+  webhookEventId: string
 ): Promise<NextResponse> {
   const razorpayOrder = event.payload.order?.entity;
 
@@ -394,7 +397,37 @@ async function handleOrderPaid(
     );
   }
 
-  // If already marked as completed, skip
+  // Record transaction for audit trail and deduplication
+  // Note: order.paid doesn't have payment details, so we store order-level data
+  const { error: transactionError } = await supabase.rpc("record_payment_transaction", {
+    p_order_id: order.id,
+    p_razorpay_order_id: razorpayOrder.id,
+    p_razorpay_payment_id: null, // order.paid event doesn't contain payment ID
+    p_event_type: "order.paid",
+    p_amount_paise: razorpayOrder.amount,
+    p_currency: razorpayOrder.currency,
+    p_status: razorpayOrder.status,
+    p_webhook_event_id: webhookEventId,
+    p_webhook_signature_verified: true,
+    p_raw_response: event.payload.order?.entity,
+  });
+
+  if (transactionError) {
+    // Check if this is a duplicate event (unique constraint violation)
+    if (transactionError.code === "23505") {
+      console.warn("[Razorpay Webhook] Duplicate event ignored:", webhookEventId);
+      return NextResponse.json({ received: true, duplicate: true }, { status: 200 });
+    }
+
+    // CRITICAL FIX: Transaction recording failed - return 500 so Razorpay retries
+    console.error("[Razorpay Webhook] Failed to record transaction:", transactionError);
+    return NextResponse.json(
+      { error: "Failed to record transaction" },
+      { status: 500 }
+    );
+  }
+
+  // If already marked as completed, skip status update but acknowledge (already recorded transaction)
   if (order.payment_status === "completed") {
     console.warn("[Razorpay Webhook] Order already marked as paid:", order.order_number);
     return NextResponse.json({ received: true, already_processed: true }, { status: 200 });
